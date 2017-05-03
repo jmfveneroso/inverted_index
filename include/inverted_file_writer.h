@@ -9,6 +9,7 @@
 #include <cstring>
 #include <iostream>
 #include <map>
+#include <memory>
 
 #include "util.h"
 #include "tuple.h"

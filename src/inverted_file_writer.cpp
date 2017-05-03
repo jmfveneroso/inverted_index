@@ -35,12 +35,16 @@ void InvertedFileWriter::WriteLexicon() {
   std::map<int, string> id_map = lexicon_->get_id_map();
   std::map<int, string>::iterator it = id_map.begin();
     
-  for (; it != id_map.end(); ++it) {
+  std::cout << "Writing lexicon..." << std::endl;
+  startbar();
+  for (int counter = 0; it != id_map.end(); ++it) {
     unsigned short size = it->second.size() + 1;
     strncpy(buffer, it->second.c_str(), size);
     fwrite(&size, sizeof(unsigned short), 1, output_file_);
     fwrite(buffer, sizeof(char), size, output_file_);
+    loadbar(++counter, lexicon_->GetNumLexemes());
   }
+  std::cout << std::endl << "Finished writing lexicon!" << std::endl;
 }
 
 /**
@@ -98,7 +102,7 @@ void InvertedFileWriter::WriteTuples () {
     loadbar(i, num_tuples -1);
   }
   
-  cout << endl;
+  cout << endl << "Finished sorting tuples!" << endl;
   
   // Write the offset to the last tuple.
   fsetpos(output_file_, &offsets_pos);

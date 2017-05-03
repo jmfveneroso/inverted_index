@@ -8,7 +8,7 @@
 
 #include <cstring>
 #include <iostream>
-
+#include <memory>
 #include "tuple.h"
 #include "lexicon.h"
 

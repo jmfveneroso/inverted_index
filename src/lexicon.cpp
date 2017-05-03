@@ -1,10 +1,13 @@
 #include "lexicon.h"
-#include "utf8.h"
+#include "utf8cpp/utf8.h"
 
 using namespace std;
 using namespace TP1;
+using namespace utf8;
 
-Lexicon::Lexicon() : id_counter_(0) {}
+Lexicon::Lexicon(std::shared_ptr<ILogger> logger) 
+  : logger_(logger), id_counter_(0) {
+}
 
 std::map<std::string, int> Lexicon::get_lexeme_map () {
   return lexeme_map_;
@@ -20,22 +23,18 @@ std::map<int, std::string> Lexicon::get_id_map () {
  *
  */
 char Lexicon::GetValidCharacter (int c) {
-    if (c >= 0x41 && c <= 0x5A) {
-        // A-Z to a-z.
-        return c + 0x20;
-    } else if (c >= 0x61 && c <= 0x7A) {
-        // a-z remains a-z.
-        return c;
-    } else if (c >= 0xC0 && c <= 0xFF) {
-        // Accented characters to unaccented.
-        const char*
-        //   "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ"
-        tr = "aaaaaaeceeeeiiiidnoooooxouuuuypsaaaaaaeceeeeiiiionooooooouuuuypy";
-        return tr[c-0xC0];
-    } else {
-        // Non alphanumeric characters to null.
-        return '\0';
-    }
+  if (c >= 0x41 && c <= 0x5A) { // A-Z to a-z.
+      return c + 0x20;
+  } else if (c >= 0x61 && c <= 0x7A) { // a-z remains a-z.
+      return c;
+  } else if (c >= 0xC0 && c <= 0xFF) { // Accented characters to unaccented.
+      static const char*
+      //   "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ"
+      tr = "aaaaaaeceeeeiiiidnoooooxouuuuypsaaaaaaeceeeeiiiionooooooouuuuypy";
+      return tr[c - 0xC0];
+  } else { // Non alphanumeric characters to null.
+      return '\0';
+  }
 }
 
 /**
@@ -43,30 +42,29 @@ char Lexicon::GetValidCharacter (int c) {
  *
  */
 vector<string> Lexicon::ExtractLexemes (string text) {
-    // std::cout << text << std::endl;
-    vector<string> result;
-    
-    string lexeme;
-    string::iterator current_it = text.begin();
-    
-    int utf8char;
-    while (current_it != text.end()) {
-        utf8char = utf8::next(current_it, text.end());
-        char c = Lexicon::GetValidCharacter(utf8char);
-        if (c != '\0') {
-            lexeme += c;
-        } else if (lexeme.length() > 0 && lexeme.length() < MAX_LEXEME_LENGTH) {
-            result.push_back(lexeme);
-            lexeme.clear();
-        } else {
-            lexeme.clear();
-        }
-    }
-    
-    if (lexeme.length() > 0 && lexeme.length() < MAX_LEXEME_LENGTH)
+  vector<string> result;
+  
+  string lexeme;
+  string::iterator current_it = text.begin();
+  
+  int utf8char;
+  while (current_it != text.end()) {
+    utf8char = next(current_it, text.end());
+    char c = Lexicon::GetValidCharacter(utf8char);
+    if (c != '\0') {
+        lexeme += c;
+    } else if (lexeme.length() > 0 && lexeme.length() < MAX_LEXEME_LENGTH) {
         result.push_back(lexeme);
-    
-    return result;
+        lexeme.clear();
+    } else {
+        lexeme.clear();
+    }
+  }
+  
+  if (lexeme.length() > 0 && lexeme.length() < MAX_LEXEME_LENGTH)
+    result.push_back(lexeme);
+  
+  return result;
 }
 
 /**
@@ -114,22 +112,27 @@ void Lexicon::WriteToFile(const string& filename) {
   
   char buffer[MAX_LEXEME_LENGTH];
   std::map<int, string>::iterator it = id_map_.begin();
-  startbar();
+
+  logger_->Log("Started writing lexicon.");
   int counter = 0;
   for (; it != id_map_.end(); ++it) {
     unsigned short size = it->second.size() + 1;
     strncpy(buffer, it->second.c_str(), size);
     fwrite(&size, sizeof(unsigned short), 1, file);
     fwrite(buffer, sizeof(char), size, file);
-    loadbar(counter++, id_map_.size() - 1);
+    if (++counter % 100000 == 0)
+      logger_->Log(std::to_string(counter) + " lexemes were written.");
   }
-  
-  cout << endl;
+  logger_->Log(
+    "Finished writing lexicon. " + std::to_string(counter) + 
+    " lexemes were written to file " + filename + "."
+  );
   
   fclose(file);
 }
 
 void Lexicon::LoadFromFile(const string& filename) {
+  std::cout << "Loading lexicon..." << std::endl;
   FILE *file = fopen(filename.c_str(), "rb");
   char buffer[255];
   short int size;
@@ -137,6 +140,7 @@ void Lexicon::LoadFromFile(const string& filename) {
     fread(buffer, sizeof(char), size, file);
     AddLexeme(buffer);
   }
+  std::cout << "Finished loading lexicon!" << std::endl;
 }
 
 void Lexicon::LoadFromInvertedFile (const string& filename) {

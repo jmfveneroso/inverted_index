@@ -18,7 +18,7 @@ using namespace std;
 
 namespace TP1 {
 
-static inline void startbar () {
+static inline void startbar() {
   cout << setw(9) << "Completed";
   cout << setw(20) << "Time Ellapsed";
   cout << setw(20) << "Time Remaining";
@@ -34,30 +34,33 @@ static inline void startbar () {
  *     loadbar(i, 100000000 - 1);
  *   }
  */
-static inline void loadbar (unsigned int x, unsigned int n) {
+static inline void loadbar(unsigned int x, unsigned int n) {
   static clock_t start_t = clock();
   
   if (n == 0) n = 0;
   
-  float ratio  = (n == 0) ? 1 : (x / (float) n);
+  double ratio = (n == 0) ? 1 : (double) x / n;
   
-  cout << setw(8) << (int)((float)(ratio * 10000) / 100) << "%";
+  cout << setw(8) << (int)((double)(ratio * 10000) / 100) << "%";
   
   clock_t t = clock() - start_t;
-  int time_ellapsed = (float) t * 1000 / CLOCKS_PER_SEC;
+  int time_ellapsed = (double) t * 1000 / CLOCKS_PER_SEC;
   
   cout << setw(17) << time_ellapsed << " ms";
-  
-  int time_remaining = (float) (1 / ratio) * time_ellapsed - time_ellapsed;
+ 
+  int time_remaining = 0;
+  if (x > 0)
+    time_remaining = (double) (1 / ratio) * time_ellapsed - time_ellapsed;
   
   if (x != 0)
     cout << setw(17) << time_remaining << " ms";
   else
     cout << setw(17) << "---" << " ms";
   
-  cout << "\r" << flush;
+  cout << setw(29) << x;
+  std::cout << "\r" << flush;
   
-  // usleep(1000000);
+  // usleep(100);
 }
   
 } // End of namespace Tp1.

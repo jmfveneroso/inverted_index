@@ -24,15 +24,6 @@ struct Tuple {
   Tuple(const Tuple& tuple);
 };
 
-struct MergeTuple : public Tuple {
-  int block_num;
-  
-  MergeTuple();
-  MergeTuple(int block_num, Tuple tuple);
-};
-
-int CompareTuples(Tuple tuple1, Tuple tuple2);
-
 } // Namespace TP1.
 
 #endif

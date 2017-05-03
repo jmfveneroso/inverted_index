@@ -1,48 +1,5 @@
 #include <iostream>
-#include <sstream>
-#include <fstream>
-#include <stdlib.h>
-
-#include "inverted_file_reader.h"
-#include "inverted_file_writer.h"
-#include "doc_finder.h"
-#include "extractor.hpp"
-
-using namespace std;
-using namespace TP1;
-
-class Injector {
- static Injector* instance_;
- std::shared_ptr<ILexicon> lexicon_;
- std::shared_ptr<ITupleSorter> tuple_sorter_;
- std::shared_ptr<Extractor> extractor_;
- std::shared_ptr<InvertedFileWriter> inverted_file_writer_;
- std::shared_ptr<IInvertedFileReader> inverted_file_reader_;
- std::shared_ptr<DocFinder> doc_finder_;
-
- public:
-  Injector() 
-    : lexicon_(std::make_shared<Lexicon>()),
-      extractor_(std::make_shared<Extractor>(lexicon_)),
-      tuple_sorter_(std::make_shared<TupleSorter>(lexicon_)),
-      inverted_file_writer_(std::make_shared<InvertedFileWriter>(lexicon_, tuple_sorter_)),
-      inverted_file_reader_(std::make_shared<InvertedFileReader>(lexicon_)),
-      doc_finder_(std::make_shared<DocFinder>(inverted_file_reader_)) {
-  }
-
-  static Injector* Instance() {
-    if (!instance_) instance_ = new Injector;
-    return instance_;
-  }
-  std::shared_ptr<ILexicon> lexicon() { return lexicon_; }
-  std::shared_ptr<ITupleSorter> tuple_sorter() { return tuple_sorter_; }
-  std::shared_ptr<Extractor> extractor() { return extractor_; }
-  std::shared_ptr<InvertedFileWriter> inverted_file_writer() { return inverted_file_writer_; }
-  std::shared_ptr<IInvertedFileReader> inverted_file_reader() { return inverted_file_reader_; }
-  std::shared_ptr<DocFinder> doc_finder() { return doc_finder_; }
-};
-
-Injector* Injector::instance_ = 0;
+#include "injector.hpp"
 
 int CommandRead(int argc, char* argv[]) {
   if (argc >= 3) {
@@ -111,14 +68,14 @@ int CommandRun(int argc, char* argv[]) {
       Injector::Instance()->lexicon()->WriteToFile(argv[5]);
       return 0;
     }
-    if (what == "block-sorter") {
-      if (argc < 4) {
-        std::cout << "usage: search run block-sorter <filename>" << endl;
-        return 1;
-      }
-      Injector::Instance()->tuple_sorter()->SortBlocks(argv[3]);
-      return 0;
-    }
+    // if (what == "block-sorter") {
+    //   if (argc < 4) {
+    //     std::cout << "usage: search run block-sorter <filename>" << endl;
+    //     return 1;
+    //   }
+    //   Injector::Instance()->tuple_sorter()->SortBlocks(argv[3]);
+    //   return 0;
+    // }
     if (what == "inverted-index") {
       if (argc < 6) {
         std::cout << "usage: search run inverted-index <tuple_file> <lexicon_file> <out_file>" << endl;

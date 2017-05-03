@@ -6,6 +6,7 @@ if (test)
 
   # Include gtest directories
   include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+  link_directories(${CMAKE_SOURCE_DIR}/lib/gumbo_parser/lib)
   
   # Include project directories
   include_directories(${COMMON_INCLUDES})

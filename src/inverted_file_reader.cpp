@@ -37,6 +37,7 @@ int InvertedFileReader::get_num_tuples () {
  * offsets section and the tuples section.
  */
 void InvertedFileReader::LoadFromFile(const string& filename) {
+  std::cout << "Loading inverted index..." << std::endl;
   file_ = fopen(filename.c_str(), "rb");
 
   fread(&num_documents_, sizeof(int), 1, file_);
@@ -57,6 +58,7 @@ void InvertedFileReader::LoadFromFile(const string& filename) {
   fgetpos(file_, &offsets_section_);
   fseek(file_, sizeof(int) * num_lexemes_, SEEK_CUR);
   fgetpos(file_, &tuples_section_);
+  std::cout << "Finished loading inverted index!" << std::endl;
 }
 
 vector<Tuple> InvertedFileReader::GetTuples(const int& lexeme_id) {  
@@ -133,7 +135,7 @@ void InvertedFileReader::Print() {
                  ", offset: " << offset << ", tuples: ";
 
     vector<Tuple> tuples = GetTuples(i + 1);
-    for (int i = 0; i < tuples.size(); ++i) {
+    for (unsigned int i = 0; i < tuples.size(); ++i) {
       Tuple& t = tuples[i];
       std::cout << "{" << t.lexeme_id << ", "
               << t.document_id << ", " << t.word_position << "}" << ((i != tuples.size() - 1) ? "," : "");

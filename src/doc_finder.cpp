@@ -1,8 +1,4 @@
-/**
- * DocFinder object
- * @author: jmfveneroso@gmail.com.br
- */
-
+#include <utility>
 #include "doc_finder.h"
 #include "extractor.hpp"
 
@@ -27,6 +23,8 @@ void DocFinder::LoadFromFile(const std::string& filename) {
   std::string content; 
   char buffer[1024];
   size_t num_read = 0; 
+
+  std::cout << "Loading urls..." << std::endl;
   while ((num_read = fread(buffer, sizeof(char), 1024, file_)) != 0) {
     for (size_t i = 0; i < num_read; ++i) {
       if (buffer[i] == '|') {
@@ -35,7 +33,8 @@ void DocFinder::LoadFromFile(const std::string& filename) {
       }
 
       if (pipes == 1) { // End of url.
-        url_map.insert(std::make_pair<int, std::string>(doc_id, content));
+        Document doc(content, 0, 0);
+        url_map_.insert({ doc_id++, doc });
         content = std::string();
       } else if (pipes == 3) { // End of document content.
         content = std::string();
@@ -44,6 +43,7 @@ void DocFinder::LoadFromFile(const std::string& filename) {
       pipes = 0;
     }
   }
+  std::cout << "Finished loading urls." << std::endl;
 }
 
 /**
@@ -178,28 +178,9 @@ void DocFinder::PrintDoc(int id) {
 }
 
 std::string DocFinder::GetUrl(int id) {
-  fseeko(file_, 3, SEEK_SET);
+  return url_map_[id].url;
+}
 
-  int doc_id = 0, pipes = 0;
-  std::string content; 
-  char buffer[1024];
-  size_t num_read = 0; 
-  while ((num_read = fread(buffer, sizeof(char), 1024, file_)) != 0) {
-    for (size_t i = 0; i < num_read; ++i) {
-      if (buffer[i] == '|') {
-        ++pipes;
-        continue;
-      }
-
-      if (pipes == 1) { // End of url.
-        if (doc_id == id) return content;
-        content = std::string();
-      } else if (pipes == 3) { // End of document content.
-        doc_id++;
-        content = std::string();
-      }
-      content += buffer[i];
-      pipes = 0;
-    }
-  }
+void DocFinder::InsertDocument(Document doc) {
+  url_map_.insert({ ++num_docs_, doc });
 }

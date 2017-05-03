@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
+set(CMAKE_CXX_STANDARD 11) # C++11...
+set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
 
 # Options. Turn on with 'cmake -Dtest=ON'.
 option(test "Build all tests." OFF) # Makes boolean 'test' available.
@@ -10,19 +12,17 @@ project(${PROJECT_NAME})
 set(CMAKE_CXX_FLAGS "-g -Wall -fPIC")
 
 # So we can do include_directories(${COMMON_INCLUDES}) in other CMakeLists.txt files.
-set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include)
+set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/lib/gumbo_parser/include)
 
 # Include project directories
 include_directories(${COMMON_INCLUDES})
-include_directories(${IRCP_SOURCE_DIR}/src)
-include_directories(${CMAKE_SOURCE_DIR}/lib/utf8cpp/src)
 
 add_subdirectory(src)
 
 # Unit tests
-include(CTest)
-
-if (test)
-  add_subdirectory(${CMAKE_SOURCE_DIR}/lib/gtest-1.7.0)
-  add_subdirectory(test)
-endif()
+# include(CTest)
+# 
+# if (test)
+#   add_subdirectory(${CMAKE_SOURCE_DIR}/lib/gtest-1.7.0)
+#   add_subdirectory(test)
+# endif()

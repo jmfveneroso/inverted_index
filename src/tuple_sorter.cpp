@@ -14,108 +14,6 @@ TupleSorter::TupleSorter (std::shared_ptr<ILexicon> lexicon)
 }
 
 /**
- * Get clean text out of HTML.
- *
- */
-string TupleSorter::CleanText (GumboNode* node) {
-  if (node->type == GUMBO_NODE_TEXT) {
-    return std::string(node->v.text.text);
-  } else if (
-    node->type == GUMBO_NODE_ELEMENT &&
-    node->v.element.tag != GUMBO_TAG_SCRIPT &&
-    node->v.element.tag != GUMBO_TAG_STYLE
-  ) {
-    std::string contents = "";
-    GumboVector* children = &node->v.element.children;
-    for (unsigned int i = 0; i < children->length; ++i) {
-      const std::string text = CleanText((GumboNode*) children->data[i]);
-      if (i != 0 && !text.empty()) {
-        contents.append(" ");
-      }
-      contents.append(text);
-    }
-    return contents;
-  } else {
-    return "";
-  }
-}
-
-/**
- * Store tuples extracted from a document into an output file.
- *
- */
-void TupleSorter::ExtractTuplesFromDoc (int doc_id, const string& document) {
-  GumboOutput* output = gumbo_parse(document.c_str());
-  
-  string text = TupleSorter::CleanText(output->root);
-  
-  int word_count = 0;
-  vector<string> lexemes = Lexicon::ExtractLexemes(text);
-  for (vector<string>::iterator it = lexemes.begin(); it != lexemes.end(); it++) {
-    int lexeme_id = lexicon_->AddLexeme(*it);
-    Tuple t(lexeme_id, doc_id, ++word_count);
-    fwrite(&t, sizeof(Tuple), 1, temp_file_);
-  }
-  
-  gumbo_destroy_output(&kGumboDefaultOptions, output);
-  num_tuples_ += lexemes.size();
-}
-
-bool wayToSort(Tuple t1, Tuple t2) {
-  if (t1.lexeme_id != t2.lexeme_id)
-    return t1.lexeme_id < t2.lexeme_id;
-  else if (t1.document_id != t2.document_id)
-    return t1.document_id < t2.document_id;
-  else if (t1.word_position != t2.word_position)
-    return t1.word_position < t2.word_position;
-  else
-    return true;
-}
-
-void TupleSorter::SortBlocks(const std::string& filename) {
-  FILE* file = fopen(filename.c_str(), "rb+");
-
-  int num_tuples = 0;
-  Tuple t;
-  while (fread(&t, sizeof(Tuple), 1, file) != 0) ++num_tuples;
-
-  int num_blocks = (num_tuples / MAX_TUPLES) + ((num_tuples % MAX_TUPLES) ? 1 : 0);
-  int padding = MAX_TUPLES - (num_tuples % MAX_TUPLES);
-
-  fseeko(file, 0, SEEK_SET);
-  // fseek(temp_file_, 0, SEEK_SET);
-  
-  startbar();
-  vector<Tuple> tuples;
-  // Read unsorted tuples from disk, sort them and write them back.
-  for (int i = 0; i < num_blocks; i++) {
-    for (int j = 0; j < MAX_TUPLES; j++) {
-      if (fread(&t, sizeof(Tuple), 1, file) == 0) t = Tuple(0, 0, 0);
-      tuples.push_back(t);
-    }
-    
-    if (i == num_blocks - 1) {
-      sort(tuples.begin(), tuples.end() - padding, less<Tuple>());
-      fseek(file, -sizeof(Tuple) * (MAX_TUPLES - padding), SEEK_CUR);
-    } else {
-      sort(tuples.begin(), tuples.end(), less<Tuple>());
-      fseek(file, -sizeof(Tuple) * MAX_TUPLES, SEEK_CUR);
-    }
-    
-    for (int j = 0; j < MAX_TUPLES; j++)
-      fwrite(&tuples[j], sizeof(Tuple), 1, file);
-    
-    tuples.clear();
-    loadbar(i, num_blocks - 1);
-  }
- 
-  fclose(file); 
-  // fseek(temp_file_, 0, SEEK_SET);
-  
-  cout << endl;
-}
-
-/**
  * Read tuples from sorted blocks in disk filling a priority queue.
  *
  */
@@ -168,8 +66,6 @@ void TupleSorter::Sort(const std::string& filename) {
     fgetpos(temp_file_, &tuple_blocks[i].pos);
     fseek(temp_file_, MAX_TUPLES * sizeof(Tuple), SEEK_CUR);
   }
-  
-  // SortBlocks();
   
   int blocks_to_be_read = MAX_TUPLES / num_blocks_;
   blocks_to_be_read = (blocks_to_be_read != 0) ? blocks_to_be_read : 1;

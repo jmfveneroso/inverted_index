@@ -46,9 +46,3 @@ bool TP1::Tuple::operator> (const Tuple &m) const {
   else
     return false;  
 }
-
-MergeTuple::MergeTuple () :
-  Tuple(), block_num(0) {}
-
-MergeTuple::MergeTuple (int block_num, Tuple tuple) :
-  Tuple(tuple), block_num(block_num) {}
