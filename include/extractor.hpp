@@ -5,6 +5,7 @@
 #include "logger.hpp"
 #include "lexicon.h"
 #include "doc_finder.h"
+#include "doc_collection.hpp"
 #include <memory>
 #include <stdio.h>
 #include <string>

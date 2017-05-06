@@ -10,6 +10,7 @@ class Injector {
  static Injector* instance_;
  std::shared_ptr<ILogger> logger_;
  std::shared_ptr<ILexicon> lexicon_;
+ std::shared_ptr<IDocCollection> doc_collection_;
  std::shared_ptr<IInvertedFileReader> inverted_file_reader_;
  std::shared_ptr<IDocFinder> doc_finder_;
  std::shared_ptr<Extractor> extractor_;
@@ -20,6 +21,7 @@ class Injector {
   Injector() 
     : logger_(std::make_shared<Logger>()),
       lexicon_(std::make_shared<Lexicon>(logger_)),
+      doc_collection_(std::make_shared<DocCollection>(logger_)),
       inverted_file_reader_(std::make_shared<InvertedFileReader>(lexicon_)),
       doc_finder_(std::make_shared<DocFinder>(inverted_file_reader_)),
       extractor_(std::make_shared<Extractor>(logger_, lexicon_, doc_finder_)),
@@ -33,6 +35,7 @@ class Injector {
   }
   std::shared_ptr<ILogger> logger() { return logger_; }
   std::shared_ptr<ILexicon> lexicon() { return lexicon_; }
+  std::shared_ptr<IDocCollection> doc_collection() { return doc_collection_; }
   std::shared_ptr<ITupleSorter> tuple_sorter() { return tuple_sorter_; }
   std::shared_ptr<Extractor> extractor() { return extractor_; }
   std::shared_ptr<InvertedFileWriter> inverted_file_writer() { return inverted_file_writer_; }

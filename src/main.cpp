@@ -68,14 +68,19 @@ int CommandRun(int argc, char* argv[]) {
       Injector::Instance()->lexicon()->WriteToFile(argv[5]);
       return 0;
     }
-    // if (what == "block-sorter") {
-    //   if (argc < 4) {
-    //     std::cout << "usage: search run block-sorter <filename>" << endl;
-    //     return 1;
-    //   }
-    //   Injector::Instance()->tuple_sorter()->SortBlocks(argv[3]);
-    //   return 0;
-    // }
+    if (what == "doc-collection") {
+      if (argc < 4) {
+        std::cout << "usage: search run doc-collection <directory>" << endl;
+        return 1;
+      }
+      Injector::Instance()->doc_collection()->Init(argv[3]);
+      RawDocument doc;
+      while (Injector::Instance()->doc_collection()->GetNextDoc(&doc)) {
+        std::cout << doc.url << std::endl;
+      }
+
+      return 0;
+    }
     if (what == "inverted-index") {
       if (argc < 6) {
         std::cout << "usage: search run inverted-index <tuple_file> <lexicon_file> <out_file>" << endl;
@@ -111,7 +116,7 @@ int CommandRun(int argc, char* argv[]) {
   std::cout << "usage: search run <command>" << endl;
   std::cout << "Available commands:" << endl;
   std::cout << "    search run extractor <in_file> <out_file> <lexicon>" << endl;
-  std::cout << "    search run block-sorter <filename>" << endl;
+  std::cout << "    search run doc-collection <directory>" << endl;
   std::cout << "    search run inverted-index <tuple_file> <lexicon_file> <out_file>" << endl;
   std::cout << "    search run boolean <documents-file> <inverted-index>" << endl;
   return 1;
