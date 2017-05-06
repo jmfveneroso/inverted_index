@@ -67,8 +67,7 @@ void Extractor::WriteTuple(Tuple& tuple) {
 }
 
 void Extractor::ExtractFromDoc(int doc_id, const string& document) {
-  GumboOutput* output = gumbo_parse(document.c_str());
-  string text = GetCleanText(output->root);
+  string text = GetCleanText(document.c_str());
   
   int word_count = 0;
   vector<string> lexemes = Lexicon::ExtractLexemes(text);
@@ -79,7 +78,6 @@ void Extractor::ExtractFromDoc(int doc_id, const string& document) {
     WriteTuple(t);
   }
   
-  gumbo_destroy_output(&kGumboDefaultOptions, output);
   num_tuples_ += lexemes.size();
 }
 
