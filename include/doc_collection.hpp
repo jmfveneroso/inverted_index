@@ -27,18 +27,18 @@ class DocCollection : public IDocCollection {
   std::shared_ptr<ILogger> logger_;
   FILE* file_ = NULL;
   unsigned int file_counter_ = 0;
-  unsigned int max_counter_ = 2;
+  unsigned int max_counter_ = 0;
   std::string directory_;
   size_t offset_ = 0;
 
   bool OpenNextFile();
-  void TrimUrl(std::string&);
 
  public:
   DocCollection(std::shared_ptr<ILogger>);
  
   void Init(const std::string&);
   bool GetNextDoc(RawDocument*);
+  static void TrimUrl(std::string&);
 };
 
 } // End of namespace.

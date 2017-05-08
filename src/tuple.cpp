@@ -8,7 +8,7 @@ Tuple::Tuple () :
   document_id(0),
   word_position(0) {}
 
-Tuple::Tuple (int lexeme_id, int document_id, int word_position) :
+Tuple::Tuple (unsigned int lexeme_id, unsigned int document_id, unsigned int word_position) :
   lexeme_id(lexeme_id),
   document_id(document_id),
   word_position(word_position) {}
@@ -19,14 +19,16 @@ Tuple::Tuple (const Tuple& tuple) :
   word_position(tuple.word_position) {}
 
 bool TP1::Tuple::operator== (const Tuple &m) const {
-  if(lexeme_id == m.lexeme_id && document_id == m.document_id && word_position == m.word_position)
+  if (lexeme_id == m.lexeme_id && document_id == m.document_id && word_position == m.word_position)
     return true;
   else
     return false;  
 }
 
 bool TP1::Tuple::operator< (const Tuple &m) const {
-  if(lexeme_id != m.lexeme_id)
+  if (lexeme_id == 0) return false;
+  if (m.lexeme_id == 0) return true;
+  if (lexeme_id != m.lexeme_id)
     return lexeme_id < m.lexeme_id;
   else if (document_id != m.document_id)
     return document_id < m.document_id;
@@ -37,7 +39,9 @@ bool TP1::Tuple::operator< (const Tuple &m) const {
 }
 
 bool TP1::Tuple::operator> (const Tuple &m) const {
-  if(lexeme_id != m.lexeme_id)
+  if (lexeme_id == 0) return true;
+  if (m.lexeme_id == 0) return false;
+  if (lexeme_id != m.lexeme_id)
     return lexeme_id > m.lexeme_id;
   else if (document_id != m.document_id)
     return document_id > m.document_id;

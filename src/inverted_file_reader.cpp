@@ -117,29 +117,29 @@ vector<Tuple> InvertedFileReader::GetTuples (const string& lexeme) {
 }
 
 void InvertedFileReader::Print() {
-  std::cout << "Num documents: " << num_documents_ << std::endl;
-  std::cout << "Num lexemes: " << num_lexemes_ << std::endl;
-  std::cout << "Num tuples: " << num_tuples_ << std::endl;
-  std::cout << "=====================" << std::endl;
-  
-  // Get position to offsets section and tuples section.
-  fsetpos(file_, &offsets_section_);
+  // std::cout << "Num documents: " << num_documents_ << std::endl;
+  // std::cout << "Num lexemes: " << num_lexemes_ << std::endl;
+  // std::cout << "Num tuples: " << num_tuples_ << std::endl;
+  // std::cout << "=====================" << std::endl;
+  // 
+  // // Get position to offsets section and tuples section.
+  // fsetpos(file_, &offsets_section_);
 
-  for (int i = 0; i < num_lexemes_; ++i) {
-    fsetpos(file_, &offsets_section_);
-    fseek(file_, i * sizeof(int), SEEK_CUR);
+  // for (int i = 0; i < num_lexemes_; ++i) {
+  //   fsetpos(file_, &offsets_section_);
+  //   fseek(file_, i * sizeof(int), SEEK_CUR);
 
-    int offset;
-    fread(&offset, sizeof(int), 1, file_);
-    std::cout << "Lexeme ("  << i + 1 <<  "): " << lexicon_->GetLexemeById(i + 1) << 
-                 ", offset: " << offset << ", tuples: ";
+  //   int offset;
+  //   fread(&offset, sizeof(int), 1, file_);
+  //   std::cout << "Lexeme ("  << i + 1 <<  "): " << lexicon_->GetLexemeById(i + 1) << 
+  //                ", offset: " << offset << ", tuples: ";
 
-    vector<Tuple> tuples = GetTuples(i + 1);
-    for (unsigned int i = 0; i < tuples.size(); ++i) {
-      Tuple& t = tuples[i];
-      std::cout << "{" << t.lexeme_id << ", "
-              << t.document_id << ", " << t.word_position << "}" << ((i != tuples.size() - 1) ? "," : "");
-    }
-    std::cout << std::endl;
-  }
+  //   vector<Tuple> tuples = GetTuples(i + 1);
+  //   for (unsigned int i = 0; i < tuples.size(); ++i) {
+  //     Tuple& t = tuples[i];
+  //     std::cout << "{" << t.lexeme_id << ", "
+  //             << t.document_id << ", " << t.word_position << "}" << ((i != tuples.size() - 1) ? "," : "");
+  //   }
+  //   std::cout << std::endl;
+  // }
 }

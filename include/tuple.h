@@ -11,16 +11,16 @@
 namespace TP1 {
 
 struct Tuple {
-  int lexeme_id;
-  int document_id;
-  int word_position;
+  unsigned int lexeme_id;
+  unsigned int document_id;
+  unsigned int word_position;
 
   bool operator< (const Tuple &) const;
   bool operator> (const Tuple &) const;
   bool operator== (const Tuple &) const;
     
   Tuple();
-  Tuple(int lexeme_id, int document_id, int word_position);
+  Tuple(unsigned int lexeme_id, unsigned int document_id, unsigned int word_position);
   Tuple(const Tuple& tuple);
 };
 

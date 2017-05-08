@@ -20,8 +20,8 @@ int CommandRead(int argc, char* argv[]) {
         return 1;
       }
 
-      Injector::Instance()->lexicon()->LoadFromFile(argv[3]);
-      Injector::Instance()->lexicon()->Print();
+      // Injector::Instance()->lexicon()->LoadFromFile(argv[3]);
+      // Injector::Instance()->lexicon()->Print();
       return 0;
     }
 
@@ -30,8 +30,7 @@ int CommandRead(int argc, char* argv[]) {
         std::cout << "usage: search read inverted-index <filename>" << endl;
         return 1;
       }
-      Injector::Instance()->inverted_file_reader()->LoadFromFile(argv[3]);
-      Injector::Instance()->inverted_file_reader()->Print();
+      Injector::Instance()->inverted_index()->Load(argv[3]);
       return 0;
     }
 
@@ -40,8 +39,8 @@ int CommandRead(int argc, char* argv[]) {
         std::cout << "usage: search read document <filename> <id>" << endl;
         return 1;
       }
-      Injector::Instance()->doc_finder()->LoadFromFile(argv[3]);
-      Injector::Instance()->doc_finder()->PrintDoc(atoi(argv[4]));
+      // Injector::Instance()->doc_finder()->LoadFromFile(argv[3]);
+      // Injector::Instance()->doc_finder()->PrintDoc(atoi(argv[4]));
       return 0;
     }
   }
@@ -64,8 +63,8 @@ int CommandRun(int argc, char* argv[]) {
         return 1;
       }
 
-      Injector::Instance()->extractor()->Extract(argv[3], argv[4]);
-      Injector::Instance()->lexicon()->WriteToFile(argv[5]);
+      // Injector::Instance()->extractor()->Extract(argv[3], argv[4]);
+      // Injector::Instance()->lexicon()->WriteToFile(argv[5]);
       return 0;
     }
     if (what == "doc-collection") {
@@ -82,31 +81,30 @@ int CommandRun(int argc, char* argv[]) {
       return 0;
     }
     if (what == "inverted-index") {
-      if (argc < 6) {
-        std::cout << "usage: search run inverted-index <tuple_file> <lexicon_file> <out_file>" << endl;
+      if (argc < 5) {
+        std::cout << "usage: search run inverted-index <collection_dir> <out_file>" << endl;
         return 1;
       }
-      Injector::Instance()->lexicon()->LoadFromFile(argv[4]);
-      Injector::Instance()->inverted_file_writer()->Write(argv[3], argv[5]);
+      Injector::Instance()->inverted_index()->CreateIndexForCollection(argv[3], argv[4]);
       return 0;
     }
     if (what == "boolean") {
-      if (argc < 5) {
-        std::cout << "usage: search run boolean <documents-file> <inverted-index>" << endl;
+      if (argc < 4) {
+        std::cout << "usage: search run boolean <inverted-index>" << endl;
         return 1;
       }
-      Injector::Instance()->doc_finder()->LoadFromFile(argv[3]);
-      Injector::Instance()->inverted_file_reader()->LoadFromFile(argv[4]);
+      Injector::Instance()->inverted_index()->Load(argv[3]);
 
       while (true) {
         std::cout << "Query >> ";
         std::string input;
         getline(cin, input);
         if (input == "exit") break;
-        vector<int> result = Injector::Instance()->doc_finder()->BooleanQuery(input);
+        vector<unsigned int> result = Injector::Instance()->boolean_model()->BooleanQuery(input);
         if (result.size() == 0) std::cout << "No results found." << std::endl;
         for (auto doc_id : result) {
-          std::cout << doc_id << ": " << Injector::Instance()->doc_finder()->GetUrl(doc_id) << std::endl;
+          Document doc = Injector::Instance()->doc_map()->GetDocById(doc_id);
+          std::cout << doc_id << ": " << doc.url << std::endl;
         }
       }
       return 0;

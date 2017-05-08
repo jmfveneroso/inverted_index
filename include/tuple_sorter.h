@@ -17,12 +17,32 @@
 
 namespace TP1 {
 
-struct TupleBlock {
-  int tuples_in_disk;
-  int tuples_in_memory;
-  fpos_t pos;
-};
+// struct TupleBlock {
+//   int tuples_in_disk;
+//   int tuples_in_memory;
+//   fpos_t pos;
+// };
   
+struct TupleBlock {
+  size_t pos;
+  off_t offset;
+  size_t tuples_fetched_from_disk;
+  size_t tuples_in_memory;
+
+  bool is_output_block;
+  size_t output_pos;
+
+  TupleBlock(off_t offset) 
+    : offset(offset), tuples_fetched_from_disk(0), 
+      tuples_in_memory(0), is_output_block(false) {
+  }
+};
+
+struct HoldingBlock {
+  Tuple tuples[MAX_TUPLES];
+  size_t num_tuples;
+};
+
 struct MergeTuple : public Tuple {
   int block_num;
   
@@ -31,42 +51,51 @@ struct MergeTuple : public Tuple {
     : Tuple(tuple), block_num(block_num) {}
 };
 
-class ITupleSorter {
-  virtual void FillQueue() = 0;
+struct PostingsList {
+  unsigned int lexeme_id;
+  std::map< unsigned int, std::vector<unsigned int> > word_offsets;
+};
 
+class ITupleSorter {
  public:
   ~ITupleSorter() {}
  
-  virtual int get_num_tuples() = 0;
-  virtual void Sort(const std::string&) = 0;
-  virtual MergeTuple PopTuple() = 0;
-  virtual void Clear() = 0;
+  virtual void Init(FILE*) = 0;
+  virtual void WriteTuple(Tuple&) = 0;
+  virtual void FlushHoldingBlock() = 0;
+  virtual void Sort() = 0;
 };
   
 class TupleSorter : public ITupleSorter {
+  std::shared_ptr<ILogger> logger_;
   std::shared_ptr<ILexicon> lexicon_;
-  TupleBlock* tuple_blocks;
-
-  FILE* temp_file_;
+  FILE* output_file_;
+  std::vector<TupleBlock> tuple_blocks_;
+  HoldingBlock holding_block_;
+  std::vector<size_t> block_map_;
+  std::vector<TupleBlock> extra_blocks_;
+  PostingsList output_postings_list_;
+  off_t output_offset_;
   std::priority_queue< 
     MergeTuple, std::vector<MergeTuple>, std::greater<MergeTuple> 
-  > tuple_queue_;
+  > tuple_heap_;
 
-  Tuple *tuples_;
-
-  int num_tuples_;
-  int num_blocks_;
-
-  void FillQueue();
+  void FillHeap();
+  void WriteOutputTuple(MergeTuple&);
+  TupleBlock* GetBlock(size_t);
+  void ReadBlock(size_t);
+  void CopyBlock(size_t, size_t);
+  void FlushPostingsList();
+  void FlushOutputBlock();
+  void ReorderTupleBlocks();
 
  public:
-  TupleSorter(std::shared_ptr<ILexicon> lexicon);
-  ~TupleSorter() {}
+  TupleSorter(std::shared_ptr<ILogger>, std::shared_ptr<ILexicon>);
  
-  int get_num_tuples() { return num_tuples_; }
-  void Sort(const std::string&);
-  MergeTuple PopTuple();
-  void Clear();
+  void Init(FILE*);
+  void WriteTuple(Tuple&);
+  void FlushHoldingBlock();
+  void Sort();
 };
 
 } // End of namespace.
