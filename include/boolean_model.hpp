@@ -15,7 +15,9 @@ using namespace std;
 
 class BooleanModel {
   std::shared_ptr<IInvertedIndex> inverted_index_;
- 
+  std::shared_ptr<DocMap> doc_map_;
+  std::shared_ptr<ILexicon> lexicon_;
+
   static std::vector<unsigned int> UniqueDocs(vector<unsigned int> v) {
     // Get only unique document ids.
     vector<unsigned int>::iterator it;
@@ -52,7 +54,12 @@ class BooleanModel {
   }
  
  public:
-  BooleanModel(std::shared_ptr<IInvertedIndex> inverted_index) : inverted_index_(inverted_index) {}
+  BooleanModel(
+    std::shared_ptr<IInvertedIndex> inverted_index,
+    std::shared_ptr<DocMap> doc_map,
+    std::shared_ptr<ILexicon> lexicon
+  ) : inverted_index_(inverted_index), doc_map_(doc_map), lexicon_(lexicon) {
+  }
 
   std::vector<unsigned int> BooleanQuery(const string& query) {
     // Extract valid lexemes from the query string.
@@ -101,6 +108,56 @@ class BooleanModel {
   
     return UniqueDocs(result);
   }
+
+  std::vector< std::pair<unsigned int, double> > RankByVectorModel(const string& query) {
+    std::vector< std::pair<unsigned int, double> > ranked_docs;
+    std::map<unsigned int, double> rank;
+    std::vector<std::string> words = Lexicon::ExtractLexemes(query);
+    for (auto& word : words) {
+      PostingsList postings_list = inverted_index_->GetPostingsList(word);
+
+      for (auto& it : postings_list.word_offsets) {
+        if (rank.find(it.first) == rank.end()) rank[it.first] = 0;
+        rank[it.first] += log2(1 + it.second.size());
+      }
+    }
+
+    for (auto& it : rank) {
+      rank[it.first] /= doc_map_->GetDocById(it.first).vector_norm;
+      ranked_docs.push_back({ it.first, rank[it.first] });
+    }
+
+    auto cmp = [](std::pair<unsigned int, double> const& a, std::pair<unsigned int, double> const& b) { 
+      return a.second > b.second;
+    };
+
+    std::sort(ranked_docs.begin(), ranked_docs.end(), cmp);
+    return ranked_docs;
+  }
+
+  std::vector< std::pair<unsigned int, double> > RankByPageRank(const string& query) {
+    std::vector< std::pair<unsigned int, double> > ranked_docs;
+
+    std::vector<unsigned int> docs;
+    std::vector<std::string> words = Lexicon::ExtractLexemes(query);
+    for (auto& word : words) {
+      PostingsList postings_list = inverted_index_->GetPostingsList(word);
+      for (auto& it : postings_list.word_offsets) docs.push_back(it.first);
+    }
+
+    for (auto& doc_id : docs)
+      ranked_docs.push_back({ doc_id, doc_map_->GetDocById(doc_id).page_rank });
+
+    auto cmp = [](std::pair<unsigned int, double> const& a, std::pair<unsigned int, double> const& b) { 
+      return a.second > b.second;
+    };
+
+    std::sort(ranked_docs.begin(), ranked_docs.end(), cmp);
+    return ranked_docs;
+  }
+
+  // std::vector<unsigned int, double> RankByAnchorText(const string& query) {
+  // }
 };
      
 } // End of namespace.

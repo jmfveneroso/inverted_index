@@ -38,7 +38,7 @@ class Injector {
       extractor_(std::make_shared<Extractor>(logger_, lexicon_, doc_map_, anchor_file_, tuple_sorter_)),
       inverted_file_writer_(std::make_shared<InvertedFileWriter>(lexicon_, tuple_sorter_)),
       inverted_index_(std::make_shared<InvertedIndex>(logger_, doc_collection_, doc_map_, lexicon_, extractor_, anchor_file_, tuple_sorter_)),
-      boolean_model_(std::make_shared<BooleanModel>(inverted_index_)) {
+      boolean_model_(std::make_shared<BooleanModel>(inverted_index_, doc_map_, lexicon_)) {
   }
 
   static Injector* Instance() {

@@ -95,16 +95,47 @@ int CommandRun(int argc, char* argv[]) {
       }
       Injector::Instance()->inverted_index()->Load(argv[3]);
 
+      size_t mode = 0;
       while (true) {
         std::cout << "Query >> ";
         std::string input;
         getline(cin, input);
         if (input == "exit") break;
-        vector<unsigned int> result = Injector::Instance()->boolean_model()->BooleanQuery(input);
-        if (result.size() == 0) std::cout << "No results found." << std::endl;
-        for (auto doc_id : result) {
-          Document doc = Injector::Instance()->doc_map()->GetDocById(doc_id);
-          std::cout << doc_id << ": " << doc.url << std::endl;
+        if (input == "boolean") { mode = 0; std::cout << "Boolean mode." << std::endl; continue; }
+        if (input == "vector") { mode = 1; std::cout << "Vector mode." << std::endl; continue; }
+        if (input == "pagerank") { mode = 2; std::cout << "Page rank mode." << std::endl; continue; }
+
+        switch (mode) {
+          case 0: {
+            vector<unsigned int> result = Injector::Instance()->boolean_model()->BooleanQuery(input);
+            if (result.size() == 0) std::cout << "No results found." << std::endl;
+            for (auto doc_id : result) {
+              Document doc = Injector::Instance()->doc_map()->GetDocById(doc_id);
+              std::cout << doc_id << ": " << doc.url << std::endl;
+            }
+            break;
+          }
+          case 1: {
+            std::vector< std::pair<unsigned int, double> > ranked_docs;
+            ranked_docs = Injector::Instance()->boolean_model()->RankByVectorModel(input);
+            if (ranked_docs.size() == 0) std::cout << "No results found." << std::endl;
+            for (auto ranked_doc : ranked_docs) {
+              Document doc = Injector::Instance()->doc_map()->GetDocById(ranked_doc.first);
+              std::cout << ranked_doc.second << ": " << doc.url << std::endl;
+            }
+            break;
+          }
+          case 2: {
+            std::vector< std::pair<unsigned int, double> > ranked_docs;
+            ranked_docs = Injector::Instance()->boolean_model()->RankByPageRank(input);
+            if (ranked_docs.size() == 0) std::cout << "No results found." << std::endl;
+            for (auto ranked_doc : ranked_docs) {
+              Document doc = Injector::Instance()->doc_map()->GetDocById(ranked_doc.first);
+              std::cout << ranked_doc.second << ": " << doc.url << std::endl;
+            }
+            break;
+          }
+          default: break;
         }
       }
       return 0;

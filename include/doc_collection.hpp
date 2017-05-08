@@ -27,7 +27,7 @@ class DocCollection : public IDocCollection {
   std::shared_ptr<ILogger> logger_;
   FILE* file_ = NULL;
   unsigned int file_counter_ = 0;
-  unsigned int max_counter_ = 0;
+  unsigned int max_counter_ = 100;
   std::string directory_;
   size_t offset_ = 0;
 
