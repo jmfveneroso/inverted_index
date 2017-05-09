@@ -11,7 +11,7 @@ std::string DocMap::TruncateUrl(std::string url) {
   if (url.find("http://")  == 0)  url = url.substr(7);
   if (url.find("https://") == 0)  url = url.substr(8);
   if (url.find("www.")     == 0)  url = url.substr(4);
-  if (url[url.size() - 1] == '/') url = url.substr(0, url.size() - 1);
+  while (url[url.size() - 1] == '/') url = url.substr(0, url.size() - 1);
   return url;
 }
 
@@ -51,8 +51,9 @@ void DocMap::AddToVectorNorm(unsigned int id, double weight) {
 }
 
 void DocMap::SqrtVectorNorms() {
-  for (auto& it : doc_map_)
+  for (auto& it : doc_map_) {
     it.second.vector_norm = sqrt(it.second.vector_norm);
+  }
 }
 
 void DocMap::AddOutboundLink(unsigned int id, unsigned int outbound_id) {
@@ -98,8 +99,9 @@ void DocMap::Write(FILE* file, off_t offset) {
 
     static char c = '\0';
     static char buffer[10000];
-    strncpy(buffer, doc.url.c_str(), doc.url.size());
-    fwrite(buffer, sizeof(char), doc.url.size(), file);
+    size_t size = (doc.url.size() <= 10000) ? doc.url.size() : 0;
+    strncpy(buffer, doc.url.c_str(), size);
+    fwrite(buffer, sizeof(char), size, file);
     fwrite(&c, sizeof(char), 1, file);
 
     fwrite(&doc.file_num, sizeof(size_t), 1, file);

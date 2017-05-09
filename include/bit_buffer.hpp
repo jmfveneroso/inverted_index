@@ -11,7 +11,7 @@ class BitBuffer {
 
   void WriteBit(bool bit) {
     unsigned char bit_offset = written_bits++ % 8;
-    if (bit_offset == 0) bytes.push_back(0);
+    if (bit_offset == 0) bytes.push_back(0); 
     if (bit == 1) bytes.back() |= (1 << (7 - bit_offset));
   }
 
@@ -74,6 +74,7 @@ class BitBuffer {
 
  public:
   void WriteInt(unsigned int num) {
+    if (num == 0) throw new std::runtime_error("Zero is not compressible with elias delta.");
     WriteEliasDelta(num);
   }
 

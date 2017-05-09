@@ -42,13 +42,14 @@ void InvertedIndex::RunExtractor() {
       ss << "Num documents: " << num_docs;
       ss << ", num lexemes: " << num_lexemes;
       ss << ", num hyperlinks: " << num_hyperlinks;
+      ss << ", anchor file size: " << anchor_file_->GetFileSize();
       logger_->Log(ss.str());
     }
   }
   tuple_sorter_->FlushHoldingBlock();
   size_t num_docs = doc_map_->GetNumDocs();
   size_t num_lexemes = lexicon_->GetNumLexemes();
-      size_t num_hyperlinks = anchor_file_->GetNumHyperlinks();
+  size_t num_hyperlinks = anchor_file_->GetNumHyperlinks();
   std::stringstream ss;
   ss << "Finished extraction with num documents: " << num_docs;
   ss << ", num lexemes: " << num_lexemes;
@@ -113,8 +114,6 @@ void InvertedIndex::CalculateVectorNorms() {
   size_t num_lexemes = lexicon_->GetNumLexemes();
   for (size_t i = 1; i <= num_lexemes; ++i) {
     PostingsList list = GetPostingsList(i);
-    std::stringstream ss;
-    ss << "Postings: " << list.lexeme_id << ", docs: " << list.word_offsets.size();
 
     Lexeme lexeme = lexicon_->GetLexemeById(i);
     double idf = log2(doc_map_->GetNumDocs() / lexeme.doc_frequency);

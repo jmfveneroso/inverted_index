@@ -1,6 +1,7 @@
 #include "extractor.hpp"
 #include "utf8cpp/utf8.h"
 #include <algorithm>
+#include <sstream>
 
 namespace TP1 {
 
@@ -39,17 +40,20 @@ void Extractor::Parse(GumboNode* node) {
   if (node->type != GUMBO_NODE_ELEMENT || node->v.element.tag == GUMBO_TAG_SCRIPT ||
     node->v.element.tag == GUMBO_TAG_STYLE) return;
 
+  for (size_t i = 0; i < node->v.element.children.length; ++i)
+    Parse((GumboNode*) node->v.element.children.data[i]);
+
   GumboAttribute* href;
   bool is_link = node->v.element.tag == GUMBO_TAG_A &&
     (href = gumbo_get_attribute(&node->v.element.attributes, "href"));
 
   if (is_link) {
     std::string anchor_text = GetCleanText(node);
-    hyperlinks_.push_back(Hyperlink(href->value, anchor_text));
+    std::vector<std::string> lexemes = Lexicon::ExtractLexemes(anchor_text);
+    std::vector<unsigned int> lexeme_ids;
+    for (auto lexeme : lexemes) lexeme_ids.push_back(lexicon_->AddLexeme(lexeme));
+    hyperlinks_.push_back(Hyperlink(href->value, lexeme_ids));
   }
-
-  for (size_t i = 0; i < node->v.element.children.length; ++i)
-    Parse((GumboNode*) node->v.element.children.data[i]);
 }
 
 void Extractor::Parse(const string& document) {
@@ -60,10 +64,18 @@ void Extractor::Parse(const string& document) {
 
 void Extractor::ExtractFromDoc(RawDocument& doc) {
   Document new_doc(doc.url, doc.file_number, doc.offset);
+
+  unsigned int id = doc_map_->GetDocId(doc.url);
+  if (id != 0) {
+    std::stringstream ss;
+    ss << "Ignoring duplicate document: " << doc.url << ". File number: " 
+       << doc.file_number << ", offset: " << doc.offset << ".";
+    logger_->Log(ss.str());
+    return; 
+  }
   unsigned int doc_id = doc_map_->AddDoc(new_doc);
 
-  Parse(doc.content.c_str());
-
+  Parse(doc.content);
   unsigned int word_count = 0;
   for (auto lexeme : lexemes_) {
     unsigned int lexeme_id = lexicon_->AddLexeme(lexeme);
@@ -71,8 +83,8 @@ void Extractor::ExtractFromDoc(RawDocument& doc) {
     tuple_sorter_->WriteTuple(tuple);
   }
   anchor_file_->WriteHyperlinks(hyperlinks_);
-  hyperlinks_ = std::vector<Hyperlink>();
-  lexemes_ = std::vector<std::string>();
+  hyperlinks_.clear();
+  lexemes_.clear();
 }
 
 void Extractor::Print(const std::string& filename) {

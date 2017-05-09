@@ -21,8 +21,10 @@ void AnchorFile::Init() {
 void AnchorFile::WriteString(const std::string& str) {
   static char c = '\0';
   static char buffer[10000];
-  strncpy(buffer, str.c_str(), str.size());
-  fwrite(buffer, sizeof(char), str.size(), file_);
+
+  size_t size = (str.size() <= 10000) ? str.size() : 10000;
+  strncpy(buffer, str.c_str(), size);
+  fwrite(buffer, sizeof(char), size, file_);
   fwrite(&c, sizeof(char), 1, file_);
 }
 
@@ -45,8 +47,21 @@ void AnchorFile::WriteHyperlinks(
 
   for (auto hyperlink : hyperlinks) {
     WriteString(hyperlink.href);
-    WriteString(hyperlink.anchor_text);
+    
+    std::vector<unsigned int>::iterator it;
+    std::sort(hyperlink.anchor_lexeme_ids.begin(), hyperlink.anchor_lexeme_ids.end());
+    it = std::unique(hyperlink.anchor_lexeme_ids.begin(), hyperlink.anchor_lexeme_ids.end());
+    
+    // Resize the vector to fit all elements properly.
+    hyperlink.anchor_lexeme_ids.resize(std::distance(hyperlink.anchor_lexeme_ids.begin(), it));
+    
+    size_t num_lexeme_ids = hyperlink.anchor_lexeme_ids.size();
+    fwrite(&num_lexeme_ids, sizeof(size_t), 1, file_);
+    for (unsigned int lexeme_id : hyperlink.anchor_lexeme_ids)
+      fwrite(&lexeme_id, sizeof(unsigned int), 1, file_);
+    // WriteString(hyperlink.anchor_text);
   }
+  file_size_ = ftello(file_);
 }
 
 std::string AnchorFile::TruncateUrl(std::string url) {
@@ -93,17 +108,23 @@ void AnchorFile::ReadHyperlinks() {
     Hyperlink hyperlink;
     for (size_t j = 0; j < num_hyperlinks; ++j) {
       hyperlink.href = ReadString();
-      hyperlink.anchor_text = ReadString();
+ 
+      size_t num_anchor_lexeme_ids;
+      fread(&num_anchor_lexeme_ids, sizeof(size_t), 1, file_);
+      for (size_t k = 0; k < num_anchor_lexeme_ids; ++k) {
+        size_t lexeme_id;
+        fread(&lexeme_id, sizeof(unsigned int), 1, file_);
+        hyperlink.anchor_lexeme_ids.push_back(lexeme_id);
+      }
+ 
+      // hyperlink.anchor_text = ReadString();
 
       std::string normalized_link = NormalizeHyperlink(i, hyperlink.href);
       unsigned int doc_id = doc_map_->GetDocId(normalized_link);
       if (doc_id == 0 || i == doc_id) continue; 
 
-      std::vector<std::string> lexemes;
-      lexemes = Lexicon::ExtractLexemes(hyperlink.anchor_text);
-      for (auto lexeme : lexemes) {
-        unsigned int lexeme_id = lexicon_->GetLexemeId(lexeme);
-        if (lexeme_id == 0) continue;
+      for (auto lexeme_id : hyperlink.anchor_lexeme_ids) {
+        if (lexeme_id == 0) throw new std::runtime_error("Lexeme id cannot be 0.");
         lexicon_->AddLink(lexeme_id, doc_id);
       }
       doc_map_->AddOutboundLink(i, doc_id);

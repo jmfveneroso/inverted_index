@@ -21,6 +21,7 @@ class IDocCollection {
  
   virtual void Init(const std::string&) = 0;
   virtual bool GetNextDoc(RawDocument*) = 0;
+  virtual void Read(size_t, size_t) = 0;
 };
 
 class DocCollection : public IDocCollection {
@@ -38,6 +39,7 @@ class DocCollection : public IDocCollection {
  
   void Init(const std::string&);
   bool GetNextDoc(RawDocument*);
+  void Read(size_t, size_t);
   static void TrimUrl(std::string&);
 };
 

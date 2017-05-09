@@ -89,11 +89,12 @@ int CommandRun(int argc, char* argv[]) {
       return 0;
     }
     if (what == "boolean") {
-      if (argc < 4) {
-        std::cout << "usage: search run boolean <inverted-index>" << endl;
+      if (argc < 5) {
+        std::cout << "usage: search run boolean <documents-directory> <inverted-index>" << endl;
         return 1;
       }
-      Injector::Instance()->inverted_index()->Load(argv[3]);
+      Injector::Instance()->doc_collection()->Init(argv[3]);
+      Injector::Instance()->inverted_index()->Load(argv[4]);
 
       size_t mode = 0;
       while (true) {
@@ -104,6 +105,12 @@ int CommandRun(int argc, char* argv[]) {
         if (input == "boolean") { mode = 0; std::cout << "Boolean mode." << std::endl; continue; }
         if (input == "vector") { mode = 1; std::cout << "Vector mode." << std::endl; continue; }
         if (input == "pagerank") { mode = 2; std::cout << "Page rank mode." << std::endl; continue; }
+        if (input.find("read ") == 0) { 
+          unsigned int doc_id = std::atoi(input.substr(5).c_str());
+          Document doc = Injector::Instance()->doc_map()->GetDocById(doc_id);
+          Injector::Instance()->doc_collection()->Read(doc.file_num, doc.offset);
+          continue;
+        }
 
         switch (mode) {
           case 0: {
@@ -147,7 +154,7 @@ int CommandRun(int argc, char* argv[]) {
   std::cout << "    search run extractor <in_file> <out_file> <lexicon>" << endl;
   std::cout << "    search run doc-collection <directory>" << endl;
   std::cout << "    search run inverted-index <tuple_file> <lexicon_file> <out_file>" << endl;
-  std::cout << "    search run boolean <documents-file> <inverted-index>" << endl;
+  std::cout << "    search run boolean <documents-directory> <inverted-index>" << endl;
   return 1;
 }
 

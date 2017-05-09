@@ -105,8 +105,9 @@ void Lexicon::Write(FILE* file, off_t offset) {
 
     static char c = '\0';
     static char buffer[10000];
-    strncpy(buffer, lexeme.lexeme.c_str(), lexeme.lexeme.size());
-    fwrite(buffer, sizeof(char), lexeme.lexeme.size(), file);
+    size_t size = (lexeme.lexeme.size() <= 10000) ? lexeme.lexeme.size() : 0;
+    strncpy(buffer, lexeme.lexeme.c_str(), size);
+    fwrite(buffer, sizeof(char), size, file);
     fwrite(&c, sizeof(char), 1, file);
 
     size_t anchor_refs = lexeme.links.size();

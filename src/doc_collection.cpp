@@ -45,6 +45,8 @@ void DocCollection::Init(const std::string& directory) {
 
 bool DocCollection::GetNextDoc(RawDocument* doc) {
   doc->url = doc->content = std::string();
+  doc->file_number = (file_counter_ == 0) ? file_counter_ : file_counter_ - 1;
+  doc->offset = ftello(file_);
 
   char c;
   size_t num_read = 0;
@@ -75,6 +77,20 @@ bool DocCollection::GetNextDoc(RawDocument* doc) {
     );
 
   return true;
+}
+
+void DocCollection::Read(size_t file_num, size_t offset) {
+  std::stringstream ss;
+  ss << directory_ << "/html_" << file_num;
+  if (file_) fclose(file_);
+  file_ = fopen(ss.str().c_str(), "rb+");
+  if (!file_) throw std::runtime_error("Error opening file " + ss.str());
+
+  fseeko(file_, offset, SEEK_SET);
+  RawDocument doc;
+  GetNextDoc(&doc);
+
+  std::cout << doc.content << std::endl;
 }
 
 } // End of namespace.

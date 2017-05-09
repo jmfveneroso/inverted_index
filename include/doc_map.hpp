@@ -16,7 +16,7 @@ struct Document {
   off_t offset;
   double page_rank;
   double next_rank;
-  double vector_norm;
+  double vector_norm = 133;
   std::vector<unsigned int> outbound_links;
 
   Document() {}

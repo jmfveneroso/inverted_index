@@ -123,6 +123,7 @@ class BooleanModel {
     }
 
     for (auto& it : rank) {
+      Document doc = doc_map_->GetDocById(it.first);
       rank[it.first] /= doc_map_->GetDocById(it.first).vector_norm;
       ranked_docs.push_back({ it.first, rank[it.first] });
     }

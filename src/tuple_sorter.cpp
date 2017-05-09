@@ -46,10 +46,13 @@ void TupleSorter::FlushHoldingBlock() {
   new_tuple_block.pos = tuple_blocks_.size();
   tuple_blocks_.push_back(new_tuple_block);
 
-  logger_->Log(
-    std::to_string(tuple_blocks_.size()) + " blocks with " + 
-    std::to_string(MAX_TUPLES) + " tuples written."
-  );
+  std::stringstream ss;
+  ss << "A sorted block was written with " << holding_block_.num_tuples;
+  ss << " tuples and " << MAX_TUPLES - holding_block_.num_tuples << " padding. ";
+  ss << "Blocks written: " << tuple_blocks_.size();
+  ss << ". Total number of tuples: " << MAX_TUPLES * (tuple_blocks_.size() - 1) + holding_block_.num_tuples;
+  ss << ". Tuples per block: " << MAX_TUPLES << ".";
+  logger_->Log(ss.str());
   holding_block_.num_tuples = 0;
 }
 
@@ -69,8 +72,9 @@ void TupleSorter::FlushOutputBlock() {
 
     block.is_output_block = true;
     fseeko(output_file_, block.offset, SEEK_SET);
-    for (size_t i = 0; i < holding_block_.num_tuples; ++i)
+    for (size_t i = 0; i < holding_block_.num_tuples; ++i) {
       fwrite(&holding_block_.tuples[i], sizeof(Tuple), 1, output_file_);
+    }
 
     block.output_pos = block_map_.size();
     block_map_.push_back(block.pos);
@@ -126,6 +130,7 @@ void TupleSorter::FillHeap() {
 
       block.tuples_fetched_from_disk++;
       block.tuples_in_memory++;
+
       tuple_heap_.push(MergeTuple(block.pos, tuple));
     }
 
@@ -153,14 +158,8 @@ void TupleSorter::ReadBlock(size_t i) {
   TupleBlock *block = GetBlock(i);
   fseeko(output_file_, block->offset, SEEK_SET);
 
-  for (
-    holding_block_.num_tuples = 0; 
-    holding_block_.num_tuples < MAX_TUPLES; 
-    ++holding_block_.num_tuples
-  ) {
-    if (fread(&holding_block_.tuples[holding_block_.num_tuples], sizeof(Tuple), 1, output_file_) != 1)
-      throw new std::runtime_error("Error reading tuple while sorting.");
-  }
+  if (fread(holding_block_.tuples, sizeof(Tuple), MAX_TUPLES, output_file_) != MAX_TUPLES)
+    throw new std::runtime_error("Error reading tuple while sorting.");
 
   std::stringstream ss;
   ss << "Block " << i << " was transfered to memory.";
@@ -215,7 +214,6 @@ void TupleSorter::FlushPostingsList() {
   if (output_postings_list_.lexeme_id == 0) return;
 
   fseeko(output_file_, output_offset_, SEEK_SET);
-  Lexeme lexeme();
   lexicon_->SetOffset(output_postings_list_.lexeme_id, output_offset_);
   lexicon_->SetDocFrequency(output_postings_list_.lexeme_id, output_postings_list_.word_offsets.size());
 
@@ -224,6 +222,7 @@ void TupleSorter::FlushPostingsList() {
   for (auto it : output_postings_list_.word_offsets) {
     unsigned int doc_id = it.first;
     unsigned int d_gap = doc_id - last_doc_id;
+    if (d_gap == 0) throw new std::runtime_error("Invalid dgap.");
     bit_buffer.WriteInt(d_gap);
 
     // Term frequency.
@@ -232,6 +231,7 @@ void TupleSorter::FlushPostingsList() {
     unsigned int last_w_off = 0;
     for (auto w_off : it.second) {    
       unsigned int w_gap = w_off - last_w_off;
+      if (w_gap == 0) throw new std::runtime_error("Invalid wgap.");
       bit_buffer.WriteInt(w_gap);
       last_w_off = w_off;
     }
@@ -245,15 +245,17 @@ void TupleSorter::FlushPostingsList() {
   }
   output_offset_ = ftello(output_file_);
 
-  // static int counter = 0;
-  // std::stringstream ss;
-  // ss << counter++ << " Postings list flushed, lexeme_id: " << output_postings_list_.lexeme_id;
-  // ss << " documents: " << output_postings_list_.word_offsets.size();
-  // ss << " byte size: " << bit_buffer.Size();
-  // logger_->Log(ss.str());
+  static int counter = 0;
+  if (counter++ % 1000 == 0) {
+    std::stringstream ss;
+    ss << counter << " postings lists flushed, current -> lexeme_id: " << output_postings_list_.lexeme_id;
+    ss << " documents: " << output_postings_list_.word_offsets.size();
+    ss << " byte size: " << bit_buffer.Size();
+    logger_->Log(ss.str());
+  }
 
   output_postings_list_.lexeme_id = 0;
-  output_postings_list_.word_offsets = std::map< unsigned int, std::vector<unsigned int> >();
+  output_postings_list_.word_offsets.clear();
 }
 
 void TupleSorter::ReorderTupleBlocks() {
