@@ -10,9 +10,13 @@ set(PROJECT_NAME inverted_index)
 project(${PROJECT_NAME})
 
 set(CMAKE_CXX_FLAGS "-g -Wall -Werror -pedantic -fPIC -O0 -D_FILE_OFFSET_BITS=64")
+# set(CMAKE_CXX_FLAGS "-g -Wall -Werror -pedantic -fPIC -O3 -D_FILE_OFFSET_BITS=64")
 
 # So we can do include_directories(${COMMON_INCLUDES}) in other CMakeLists.txt files.
-set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/lib/gumbo_parser/include)
+set(COMMON_INCLUDES 
+ ${PROJECT_SOURCE_DIR}/include 
+ ${CMAKE_SOURCE_DIR}/lib/gumbo_parser/include
+)
 
 # Include project directories
 include_directories(${COMMON_INCLUDES})

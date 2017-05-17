@@ -12,7 +12,7 @@
 namespace TP1 {
 
 struct InvertedIndexHeader {
-  size_t fingerprint; 
+  size_t num_blocks; 
   size_t num_lexemes; 
   size_t num_docs; 
   size_t anchor_index_offset; 
@@ -29,6 +29,8 @@ class IInvertedIndex {
     const std::string&, const std::string&
   ) = 0;
   virtual void Load(const std::string&) = 0;
+  virtual void Sort(const std::string&) = 0;
+  virtual void CreateAnchorIndex(const std::string&, const std::string&) = 0;
 };
 
 class InvertedIndex : public IInvertedIndex {
@@ -37,7 +39,6 @@ class InvertedIndex : public IInvertedIndex {
   std::shared_ptr<DocMap> doc_map_;
   std::shared_ptr<ILexicon> lexicon_;
   std::shared_ptr<Extractor> extractor_;
-  std::shared_ptr<AnchorFile> anchor_file_;
   std::shared_ptr<ITupleSorter> tuple_sorter_;
   InvertedIndexHeader header_;
   FILE* output_file_;
@@ -56,7 +57,6 @@ class InvertedIndex : public IInvertedIndex {
     std::shared_ptr<DocMap>,
     std::shared_ptr<ILexicon>,
     std::shared_ptr<Extractor>,
-    std::shared_ptr<AnchorFile>,
     std::shared_ptr<ITupleSorter>
   );
  
@@ -65,7 +65,9 @@ class InvertedIndex : public IInvertedIndex {
   void CreateIndexForCollection(
     const std::string&, const std::string&
   );
+  void Sort(const std::string&);
   void Load(const std::string&);
+  void CreateAnchorIndex(const std::string&, const std::string&);
 };
 
 } // End of namespace.

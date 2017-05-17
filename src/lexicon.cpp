@@ -1,5 +1,6 @@
 #include "lexicon.h"
 #include "utf8cpp/utf8.h"
+#include <cstring>
 
 using namespace std;
 using namespace TP1;
@@ -100,13 +101,13 @@ struct Lexeme {
 
 void Lexicon::Write(FILE* file, off_t offset) {
   fseeko(file, offset, SEEK_SET);
-  for (size_t i = 1; i < id_map_.size(); ++i) {
+  for (size_t i = 1; i <= id_map_.size(); ++i) {
     Lexeme& lexeme = id_map_[i];
 
     static char c = '\0';
     static char buffer[10000];
     size_t size = (lexeme.lexeme.size() <= 10000) ? lexeme.lexeme.size() : 0;
-    strncpy(buffer, lexeme.lexeme.c_str(), size);
+    std::strncpy(buffer, lexeme.lexeme.c_str(), size);
     fwrite(buffer, sizeof(char), size, file);
     fwrite(&c, sizeof(char), 1, file);
 
@@ -120,19 +121,24 @@ void Lexicon::Write(FILE* file, off_t offset) {
 
 void Lexicon::Load(FILE* file, off_t offset, size_t num_lexemes) {
   fseeko(file, offset, SEEK_SET);
-  for (size_t i = 1; i < num_lexemes; ++i) {
+  for (size_t i = 0; i < num_lexemes; ++i) {
     std::string lexeme;
     char c;
     while (fread(&c, sizeof(char), 1, file) > 0) {
       if (c == '\0') break;
       lexeme += c; 
     }
-    AddLexeme(lexeme); 
+    size_t id = AddLexeme(lexeme); 
 
-    fread(&id_map_[i].offset, sizeof(off_t), 1, file);
-    fread(&id_map_[i].anchor_offset, sizeof(off_t), 1, file);
-    fread(&id_map_[i].doc_frequency, sizeof(size_t), 1, file);
-    fread(&id_map_[i].anchor_refs, sizeof(size_t), 1, file);
+    size_t ret = 0;
+    ret += fread(&id_map_[id].offset, sizeof(off_t), 1, file);
+    ret += fread(&id_map_[id].anchor_offset, sizeof(off_t), 1, file);
+    ret += fread(&id_map_[id].doc_frequency, sizeof(size_t), 1, file);
+    ret += fread(&id_map_[id].anchor_refs, sizeof(size_t), 1, file);
+
+    if (ret != 4) {
+      throw new std::runtime_error("Error loading lexicon.");
+    }
   }
 }
 

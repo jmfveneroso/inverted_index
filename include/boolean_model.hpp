@@ -66,7 +66,11 @@ class BooleanModel {
     std::vector<std::string> words = Lexicon::ExtractLexemes(query);
     
     std::vector<unsigned int> result;
-    
+
+    std::cout << "Results for: ";    
+    for (auto word : words) std::cout << word << ", ";
+    std::cout << std::endl;
+
     bool op_and = false, op_or = false;
     for (std::vector<std::string>::iterator it = words.begin(); it < words.end(); it++) {    
       if (it->compare("and") == 0 || it->compare("AND") == 0) {
@@ -84,7 +88,14 @@ class BooleanModel {
         
         // Get document ids.
         std::vector<unsigned int> docs;
-        for (auto& it : postings_list.word_offsets) docs.push_back(it.first);
+        for (auto& it : postings_list.word_offsets) {
+          docs.push_back(it.first);
+          std::cout << it.first << ": ";
+          for (auto& it2 : it.second) {
+            std::cout << it2 << ", ";
+          }
+          std::cout << std::endl;
+        }
         
         if (postings_list.word_offsets.size() == 0 && op_and) {
           result.clear();

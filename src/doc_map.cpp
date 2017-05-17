@@ -1,5 +1,6 @@
 #include "doc_map.hpp"
 #include <math.h>
+#include <cstring>
 
 namespace TP1 {
 
@@ -57,12 +58,12 @@ void DocMap::SqrtVectorNorms() {
 }
 
 void DocMap::AddOutboundLink(unsigned int id, unsigned int outbound_id) {
-  doc_map_[id].outbound_links.push_back(outbound_id);
+  doc_map_[id].outbound_links.insert(outbound_id);
 }
 
 void DocMap::CalculatePageRank() {
-  for (size_t i = 0; i < 1000; ++i) {
-    if (i % 100 == 0) logger_->Log("Page rank iteration: " + std::to_string(i));
+  for (size_t i = 0; i < 300; ++i) {
+    if (i % 10 == 0) logger_->Log("Page rank iteration: " + std::to_string(i));
 
     double global_rank = 0;
     for (size_t j = 1; j < doc_map_.size(); ++j) {
@@ -100,7 +101,7 @@ void DocMap::Write(FILE* file, off_t offset) {
     static char c = '\0';
     static char buffer[10000];
     size_t size = (doc.url.size() <= 10000) ? doc.url.size() : 0;
-    strncpy(buffer, doc.url.c_str(), size);
+    std::strncpy(buffer, doc.url.c_str(), size);
     fwrite(buffer, sizeof(char), size, file);
     fwrite(&c, sizeof(char), 1, file);
 
@@ -113,7 +114,7 @@ void DocMap::Write(FILE* file, off_t offset) {
 
 void DocMap::Load(FILE* file, off_t offset, size_t num_docs) {
   fseeko(file, offset, SEEK_SET);
-  for (size_t i = 1; i <= num_docs; ++i) {
+  for (size_t i = 0; i < num_docs; ++i) {
     Document doc;
     char c;
     while (fread(&c, sizeof(char), 1, file) > 0) {
@@ -121,10 +122,12 @@ void DocMap::Load(FILE* file, off_t offset, size_t num_docs) {
       doc.url += c; 
     }
 
-    fread(&doc.file_num, sizeof(size_t), 1, file);
-    fread(&doc.offset, sizeof(off_t), 1, file);
-    fread(&doc.page_rank, sizeof(double), 1, file);
-    fread(&doc.vector_norm, sizeof(double), 1, file);
+    size_t result = 0;
+    result += fread(&doc.file_num, sizeof(size_t), 1, file);
+    result += fread(&doc.offset, sizeof(off_t), 1, file);
+    result += fread(&doc.page_rank, sizeof(double), 1, file);
+    result += fread(&doc.vector_norm, sizeof(double), 1, file);
+    if (result != 4) throw new std::runtime_error("Error loading doc map.");
     AddDoc(doc); 
   }
 }

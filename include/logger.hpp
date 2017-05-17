@@ -20,8 +20,9 @@ class Logger : public ILogger {
   Logger() {}
  
   void Log(const std::string& msg) {
+    static auto then = system_clock::now();
     size_t ms = duration_cast<milliseconds>(
-      system_clock::now().time_since_epoch()
+      system_clock::now() - then
     ).count();
    
     std::cout << "[" << ms << "] " << msg << std::endl; 

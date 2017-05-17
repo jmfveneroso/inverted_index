@@ -2,9 +2,9 @@ include_directories(${CMAKE_SOURCE_DIR}/lib)
 link_directories(${CMAKE_SOURCE_DIR}/lib/gumbo_parser/lib)
 
 set(SRC 
-  inverted_index.cpp doc_finder.cpp extractor.cpp inverted_file_writer.cpp 
-  inverted_file_reader.cpp tuple_sorter.cpp doc_collection.cpp lexicon.cpp 
-  anchor_file.cpp doc_map.cpp tuple.cpp 
+  inverted_index.cpp extractor.cpp
+  doc_collection.cpp lexicon.cpp tuple_sorter.cpp
+  doc_map.cpp tuple.cpp 
 )
 
 # Make a library to generalize the inverted index.

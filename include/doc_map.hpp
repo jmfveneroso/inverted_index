@@ -7,6 +7,7 @@
 #include <memory>
 #include <stdio.h>
 #include <string>
+#include <set>
 
 namespace TP1 {
 
@@ -17,7 +18,7 @@ struct Document {
   double page_rank;
   double next_rank;
   double vector_norm = 133;
-  std::vector<unsigned int> outbound_links;
+  std::set<unsigned int> outbound_links;
 
   Document() {}
   Document(std::string url, size_t file_num, off_t offset) 

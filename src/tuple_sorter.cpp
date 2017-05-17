@@ -18,6 +18,7 @@ TupleSorter::TupleSorter(
 
 void TupleSorter::Init(FILE* output_file) {
   output_file_ = output_file;
+  holding_block_.tuples = new Tuple[MAX_TUPLES];
 }
 
 void TupleSorter::FlushHoldingBlock() {
@@ -125,8 +126,16 @@ void TupleSorter::FillHeap() {
     fseeko(output_file_, block.offset + block.tuples_fetched_from_disk * sizeof(Tuple), SEEK_SET);
     for (size_t i = 0; i < batch_size; ++i) {
       Tuple tuple;
-      if (fread(&tuple, sizeof(Tuple), 1, output_file_) != 1)
+      size_t num_read = 0;
+      if ((num_read = fread(&tuple, sizeof(Tuple), 1, output_file_)) != 1) {
+        logger_->Log("Block num: " + std::to_string(block.pos));
+        logger_->Log("Block offset: " + std::to_string(block.offset));
+        logger_->Log("Block from disk: " + std::to_string(block.tuples_fetched_from_disk));
+        logger_->Log("Batch size: " + std::to_string(batch_size));
+        logger_->Log("File pos: " + std::to_string(ftell(output_file_)));
+        logger_->Log("Num read: " + std::to_string(num_read));
         throw new std::runtime_error("Error reading tuple while sorting.");
+      }
 
       block.tuples_fetched_from_disk++;
       block.tuples_in_memory++;
@@ -222,7 +231,11 @@ void TupleSorter::FlushPostingsList() {
   for (auto it : output_postings_list_.word_offsets) {
     unsigned int doc_id = it.first;
     unsigned int d_gap = doc_id - last_doc_id;
-    if (d_gap == 0) throw new std::runtime_error("Invalid dgap.");
+    if (d_gap == 0) {
+      logger_->Log("Duplicate d_gap in document " + std::to_string(doc_id));
+      // throw new std::runtime_error("Invalid dgap.");
+      continue;
+    }
     bit_buffer.WriteInt(d_gap);
 
     // Term frequency.
@@ -231,7 +244,11 @@ void TupleSorter::FlushPostingsList() {
     unsigned int last_w_off = 0;
     for (auto w_off : it.second) {    
       unsigned int w_gap = w_off - last_w_off;
-      if (w_gap == 0) throw new std::runtime_error("Invalid wgap.");
+      if (w_gap == 0) {
+        logger_->Log("Duplicate w_gap in document " + std::to_string(doc_id));
+        // throw new std::runtime_error("Invalid wgap.");
+        continue;
+      }
       bit_buffer.WriteInt(w_gap);
       last_w_off = w_off;
     }
@@ -300,6 +317,14 @@ void TupleSorter::ReorderTupleBlocks() {
   FlushPostingsList();
 }
 
+void TupleSorter::LoadBlocks(size_t num_blocks, off_t offset) {
+  for (size_t i = 0; i < num_blocks; ++i) {
+    TupleBlock new_tuple_block(offset + i * MAX_TUPLES * sizeof(Tuple));
+    new_tuple_block.pos = tuple_blocks_.size();
+    tuple_blocks_.push_back(new_tuple_block);
+  }
+}
+
 void TupleSorter::Sort() {
   FillHeap();
   size_t counter = 0;
@@ -315,4 +340,5 @@ void TupleSorter::Sort() {
   FlushOutputBlock();
   ReorderTupleBlocks();
   logger_->Log("Finished sorting " + std::to_string(counter) + " tuples.");
+  delete[] holding_block_.tuples;
 }

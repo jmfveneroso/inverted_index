@@ -1,11 +1,13 @@
 #include <sstream>
 #include <algorithm>  
 #include "doc_collection.hpp"
+#include "lexicon.h"
 
 namespace TP1 {
 
-DocCollection::DocCollection(std::shared_ptr<ILogger> logger) 
+DocCollection::DocCollection(std::shared_ptr<ILogger> logger)
   : logger_(logger) {
+  start_counter_ = file_counter_;
 }
 
 bool DocCollection::OpenNextFile() {
@@ -28,8 +30,8 @@ bool DocCollection::OpenNextFile() {
 
 void DocCollection::TrimUrl(std::string& s) {
   s.erase(
-    s.begin(), 
-    std::find_if(s.begin(), s.end(), 
+    s.begin(),
+    std::find_if(s.begin(), s.end(),
     std::not1(std::ptr_fun<int, int>(std::isspace)))
   );
   s.erase(
@@ -43,43 +45,57 @@ void DocCollection::Init(const std::string& directory) {
   OpenNextFile();
 }
 
+bool DocCollection::ReadBit(char* c) {
+  offset_++;
+  if (char_buffer_.cursor == char_buffer_.num_read) {
+    char_buffer_.num_read = fread(char_buffer_.buffer, sizeof(char), 10000, file_);
+    char_buffer_.cursor = 0;
+    if (char_buffer_.num_read == 0) {
+      if (OpenNextFile()) return ReadBit(c);
+      else return false;
+    }
+  } 
+  *c = char_buffer_.buffer[char_buffer_.cursor++];
+  return true;
+}
+
 bool DocCollection::GetNextDoc(RawDocument* doc) {
   doc->url = doc->content = std::string();
   doc->file_number = (file_counter_ == 0) ? file_counter_ : file_counter_ - 1;
-  doc->offset = ftello(file_);
+  doc->offset = offset_;
 
   char c;
-  size_t num_read = 0;
-  while ((num_read = fread(&c, sizeof(char), 1, file_)) > 0) {
-    offset_++;
+  while (ReadBit(&c)) {
     if (c == '|') break;
     doc->url += c;
   }
 
-  if (num_read == 0) {
-    if (!OpenNextFile()) return false;
-    return GetNextDoc(doc);
-  }
+  if (char_buffer_.num_read == 0) return false;
   TrimUrl(doc->url);
 
-  while (fread(&c, sizeof(char), 1, file_) > 0) {
-    offset_++;
-    if (c == '|') {
-      fseeko(file_, 2, SEEK_CUR);
-      return true;
+  size_t pipes = 0;
+  while (ReadBit(&c)) {
+    if (c == '|') { 
+      ++pipes;
+      if (pipes == 3) return true;
+      continue;
+    } else if (pipes > 0) {
+      logger_->Log(
+        "There is a trailing pipe at file " + std::to_string(file_counter_) + ": " + 
+        std::to_string(offset_) + ". Treating it as content."
+      );
+      pipes = 0;
     }
+
     doc->content += c;
   }
 
-  if (num_read == 0)
-    throw std::runtime_error(
-      "Reached end of file without finishing document content."
-    );
-
-  return true;
+  throw std::runtime_error(
+    "Reached end of file without finishing document content."
+  );
 }
 
-void DocCollection::Read(size_t file_num, size_t offset) {
+RawDocument DocCollection::Read(size_t file_num, size_t offset) {
   std::stringstream ss;
   ss << directory_ << "/html_" << file_num;
   if (file_) fclose(file_);
@@ -88,9 +104,17 @@ void DocCollection::Read(size_t file_num, size_t offset) {
 
   fseeko(file_, offset, SEEK_SET);
   RawDocument doc;
+  char_buffer_.num_read = 0;
+  char_buffer_.cursor = 0;
   GetNextDoc(&doc);
 
-  std::cout << doc.content << std::endl;
+  return doc;
+  // std::cout << doc.content << std::endl;
+}
+
+void DocCollection::Rewind() {
+  file_counter_ = start_counter_;
+  OpenNextFile();
 }
 
 } // End of namespace.

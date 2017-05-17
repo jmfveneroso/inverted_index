@@ -17,12 +17,6 @@
 
 namespace TP1 {
 
-// struct TupleBlock {
-//   int tuples_in_disk;
-//   int tuples_in_memory;
-//   fpos_t pos;
-// };
-  
 struct TupleBlock {
   size_t pos;
   off_t offset;
@@ -39,7 +33,7 @@ struct TupleBlock {
 };
 
 struct HoldingBlock {
-  Tuple tuples[MAX_TUPLES];
+  Tuple* tuples;
   size_t num_tuples;
 };
 
@@ -64,6 +58,8 @@ class ITupleSorter {
   virtual void WriteTuple(Tuple&) = 0;
   virtual void FlushHoldingBlock() = 0;
   virtual void Sort() = 0;
+  virtual void LoadBlocks(size_t, off_t) = 0;
+  virtual size_t GetNumBlocks() = 0;
 };
   
 class TupleSorter : public ITupleSorter {
@@ -96,6 +92,8 @@ class TupleSorter : public ITupleSorter {
   void WriteTuple(Tuple&);
   void FlushHoldingBlock();
   void Sort();
+  void LoadBlocks(size_t, off_t);
+  size_t GetNumBlocks() { return tuple_blocks_.size(); }
 };
 
 } // End of namespace.

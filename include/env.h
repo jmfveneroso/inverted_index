@@ -8,6 +8,5 @@
 #define MAX_LEXEME_LENGTH 256
 
 #define MAX_TUPLES 50000000
-#define BLOCK_SIZE 50000000
 
 #endif

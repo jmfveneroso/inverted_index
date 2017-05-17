@@ -67,17 +67,20 @@ int CommandRun(int argc, char* argv[]) {
       // Injector::Instance()->lexicon()->WriteToFile(argv[5]);
       return 0;
     }
-    if (what == "doc-collection") {
+    if (what == "sorter") {
       if (argc < 4) {
-        std::cout << "usage: search run doc-collection <directory>" << endl;
+        std::cout << "usage: search run sorter <out_file>" << endl;
         return 1;
       }
-      Injector::Instance()->doc_collection()->Init(argv[3]);
-      RawDocument doc;
-      while (Injector::Instance()->doc_collection()->GetNextDoc(&doc)) {
-        std::cout << doc.url << std::endl;
+      Injector::Instance()->inverted_index()->Sort(argv[3]);
+      return 0;
+    }
+    if (what == "anchor") {
+      if (argc < 5) {
+        std::cout << "usage: search run anchor <collection_dir> <out_file>" << endl;
+        return 1;
       }
-
+      Injector::Instance()->inverted_index()->CreateAnchorIndex(argv[3], argv[4]);
       return 0;
     }
     if (what == "inverted-index") {
@@ -107,8 +110,13 @@ int CommandRun(int argc, char* argv[]) {
         if (input == "pagerank") { mode = 2; std::cout << "Page rank mode." << std::endl; continue; }
         if (input.find("read ") == 0) { 
           unsigned int doc_id = std::atoi(input.substr(5).c_str());
-          Document doc = Injector::Instance()->doc_map()->GetDocById(doc_id);
-          Injector::Instance()->doc_collection()->Read(doc.file_num, doc.offset);
+          Injector::Instance()->extractor()->ReadDoc(doc_id);
+          continue;
+        }
+
+        if (input.find("lexeme ") == 0) { 
+          unsigned int lexeme_id = std::atoi(input.substr(7).c_str());
+          std::cout << Injector::Instance()->lexicon()->GetLexemeById(lexeme_id).lexeme << std::endl;
           continue;
         }
 
@@ -152,7 +160,8 @@ int CommandRun(int argc, char* argv[]) {
   std::cout << "usage: search run <command>" << endl;
   std::cout << "Available commands:" << endl;
   std::cout << "    search run extractor <in_file> <out_file> <lexicon>" << endl;
-  std::cout << "    search run doc-collection <directory>" << endl;
+  std::cout << "    search run sorter <out_file>" << endl;
+  std::cout << "    search run anchor <documents-directory> <out_file>" << endl;
   std::cout << "    search run inverted-index <tuple_file> <lexicon_file> <out_file>" << endl;
   std::cout << "    search run boolean <documents-directory> <inverted-index>" << endl;
   return 1;
