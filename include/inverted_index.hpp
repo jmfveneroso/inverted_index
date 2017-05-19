@@ -31,6 +31,7 @@ class IInvertedIndex {
   virtual void Load(const std::string&) = 0;
   virtual void Sort(const std::string&) = 0;
   virtual void CreateAnchorIndex(const std::string&, const std::string&) = 0;
+  virtual void Extract(const std::string&, const std::string&) = 0;
 };
 
 class InvertedIndex : public IInvertedIndex {
@@ -68,6 +69,7 @@ class InvertedIndex : public IInvertedIndex {
   void Sort(const std::string&);
   void Load(const std::string&);
   void CreateAnchorIndex(const std::string&, const std::string&);
+  void Extract(const std::string&, const std::string&);
 };
 
 } // End of namespace.

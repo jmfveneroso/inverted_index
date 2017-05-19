@@ -162,6 +162,39 @@ void InvertedIndex::WriteAnchorFile() {
   logger_->Log(ss.str());
 }
 
+void InvertedIndex::Extract(
+  const std::string& directory, const std::string& output_filename
+) {
+  doc_collection_->Init(directory);
+  output_file_ = fopen(output_filename.c_str(), "wb+");  
+  if (output_file_ == NULL)
+    throw new std::runtime_error("Could not open file " + output_filename);
+
+  WriteHeader();
+
+  tuple_sorter_->Init(output_file_);
+
+  RunExtractor();
+  header_.num_blocks = tuple_sorter_->GetNumBlocks();
+
+  header_.doc_map_offset = ftello(output_file_);
+  logger_->Log("Started writing the documents map.");
+  doc_map_->Write(output_file_, header_.doc_map_offset);
+  logger_->Log("Finished writing the documents map.");
+
+  header_.lexicon_offset = ftello(output_file_);
+  logger_->Log("Started writing the lexicon.");
+  lexicon_->Write(output_file_, header_.lexicon_offset);
+  logger_->Log("Finished writing the lexicon.");
+
+  // Update header after we acquired all the missing information.
+  header_.num_docs = doc_map_->GetNumDocs();
+  header_.num_lexemes = lexicon_->GetNumLexemes();
+  WriteHeader();
+
+  logger_->Log("Finished writing the inverted index.");
+}
+
 void InvertedIndex::CreateIndexForCollection(
   const std::string& directory, const std::string& output_filename
 ) {
@@ -177,17 +210,17 @@ void InvertedIndex::CreateIndexForCollection(
   RunExtractor();
   header_.num_blocks = tuple_sorter_->GetNumBlocks();
 
-  // tuple_sorter_->Sort();
-  // header_.anchor_index_offset = ftello(output_file_);
-  // CalculateVectorNorms();
+  tuple_sorter_->Sort();
+  header_.anchor_index_offset = ftello(output_file_);
+  CalculateVectorNorms();
 
-  // logger_->Log("Started writing anchor index.");
-  // WriteAnchorFile();
-  // logger_->Log("Finished writing anchor index.");
+  logger_->Log("Started writing anchor index.");
+  WriteAnchorFile();
+  logger_->Log("Finished writing anchor index.");
 
-  // logger_->Log("Calculating page rank.");
-  // doc_map_->CalculatePageRank();
-  // logger_->Log("Finished calculating page rank.");
+  logger_->Log("Calculating page rank.");
+  doc_map_->CalculatePageRank();
+  logger_->Log("Finished calculating page rank.");
 
   header_.doc_map_offset = ftello(output_file_);
   logger_->Log("Started writing the documents map.");
@@ -252,7 +285,13 @@ void InvertedIndex::Sort(
   logger_->Log("Started writing the lexicon.");
   lexicon_->Write(output_file_, header_.lexicon_offset);
   logger_->Log("Finished writing the lexicon.");
+  off_t current = ftell(output_file_);
   WriteHeader();
+
+  if (truncate(filename.c_str(), current + 1) != 0)
+    throw new std::runtime_error("Error truncating file.");
+  else 
+    std::cout << "The file was truncated to " << current << " bytes." << std::endl;
 }
 
 void InvertedIndex::CreateAnchorIndex(
@@ -299,12 +338,19 @@ void InvertedIndex::Load(const std::string& filename) {
   output_file_ = fopen(filename.c_str(), "rb+"); 
   ReadHeader();
 
+  logger_->Log("The postings lists section has "  + std::to_string(header_.anchor_index_offset - sizeof(InvertedIndexHeader)) + " bytes");
+
+  logger_->Log("Doc map starts at "  + std::to_string(header_.doc_map_offset));
   logger_->Log("Loading "  + std::to_string(header_.num_docs) + " documents...");
   doc_map_->Load(output_file_, header_.doc_map_offset, header_.num_docs);
   logger_->Log("Finished loading document map.");
 
+  logger_->Log("Lexicon starts at "  + std::to_string(header_.lexicon_offset));
   logger_->Log("Loading "  + std::to_string(header_.num_lexemes) + " lexemes...");
   lexicon_->Load(output_file_, header_.lexicon_offset, header_.num_lexemes);
+
+  off_t current = ftell(output_file_);
+  logger_->Log("Lexicon ends at "  + std::to_string(current));
   logger_->Log("Finished loading lexicon.");
 }
 
