@@ -5,3 +5,9 @@
 /code/lib/htmlcxx-0.84
 /build
 test.data
+/tex/report.dvi
+/tex/report.log
+/tex/report.out
+/tex/report.pdf
+/tex/report.toc
+/tex/report.aux
