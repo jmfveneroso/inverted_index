@@ -1,5 +1,5 @@
-% \documentclass{acmart}
 \documentclass{report}
+\usepackage{sbc-template}
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -33,7 +33,7 @@ em tempo de busca. Este relatório descreve a implementação de um índice inve
 os experimentos realizados com base em uma coleção com aproximadamente 650 GB de documentos
 primariamente em português coletados na web. A versão mais recente do código pode ser obtida
 em: https://github.com/jmfveneroso/inverted-index. Para instruções de compilação e uso, leia
-o arquivo README.md.
+o arquivo README.md. 
 
 \chapter{Índice invertido}
 O objetivo deste projeto era implementar uma ferramenta eficiente de construção de índices 
@@ -302,12 +302,11 @@ No entanto, as conclusões gerais não ficam muito prejudicadas por esta perda d
 \end{table}
 
 Antes de iniciar o buscador, é necessário carregar em memória as estruturas auxiliares do índice invertido: o lexicon e o mapa de documentos. Este processo
-leva aproximadamente 220 segundos para o arquivo finalizado. Após esta etapa ser concluída, a busca é muito mais rápida.
+leva aproximadamente 220 segundos.
 
 Para conferir a qualidade do índice gerado no primeiro experimento, foram realizadas 10 buscas cujos resultados estão descritos
 na tabela \ref{tab:search}, a tabela descreve o tempo para listar todos os documentos onde o termo aparece, o número de documentos onde o termo
-aparece e a frequência total do termo na coleção. As palavras foram escolhidas aleatoriamente, mas palavras com frequência muito alta foram evitadas. Um exemplo
-de saída do buscador foi salvo na root do projeto com o nome search.log.
+aparece e a frequência total do termo na coleção. Um exemplo de saída do buscador foi salvo na root do projeto com o nome search.log.
 
 \section{Ordenação X Memória principal}
 
