@@ -22,11 +22,3 @@ set(COMMON_INCLUDES
 include_directories(${COMMON_INCLUDES})
 
 add_subdirectory(src)
-
-# Unit tests
-# include(CTest)
-# 
-# if (test)
-#   add_subdirectory(${CMAKE_SOURCE_DIR}/lib/gtest-1.7.0)
-#   add_subdirectory(test)
-# endif()

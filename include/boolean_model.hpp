@@ -10,7 +10,7 @@
 #include <chrono>
 #include "inverted_index.hpp"
 
-namespace TP1 {
+namespace InvertedIndex {
 
 using namespace std;
 using namespace std::chrono;

@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-namespace TP1 {
+namespace InvertedIndex {
 
 InvertedIndex::InvertedIndex(
   std::shared_ptr<ILogger> logger, 

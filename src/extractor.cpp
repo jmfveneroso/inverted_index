@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <sstream>
 
-namespace TP1 {
+namespace InvertedIndex {
 
 Extractor::Extractor(
   std::shared_ptr<ILogger> logger,
@@ -34,10 +34,32 @@ std::string Extractor::GetCleanText(GumboNode* node) {
 }
 
 bool Extractor::IsStopWord(const std::string& lexeme){
-  static std::vector<std::string> stop_words = {
-    "de ", "a ", "o ", "que ", "e ", "do ", "da ", "em ", "um ", "para ", "e ", "com ", "nao ", "uma ", "os ", "no ", "se ", "na ", "por ", "mais ", "as ", "dos ", "como ", "mas ", "foi ", "ao ", "ele ", "das ", "tem ", "seu ", "sua ", "ou ", "ser ", "quando ", "muito ", "ha ", "nos ", "ja ", "esta ", "eu ", "tambem ", "so ", "pelo ", "pela ", "ate ", "isso ", "ela ", "entre ", "era ", "depois ", "sem ", "mesmo ", "aos ", "ter ", "seus ", "quem ", "nas ", "me ", "esse ", "eles ", "estao ", "voce", "tinha ", "foram ", "essa ", "num ", "nem ", "suas ", "meu ", "às ", "minha ", "tem ", "numa ", "pelos ", "elas ", "havia ", "seja ", "qual ", "sera ", "nos ", "tenho ", "lhe ", "deles ", "essas ", "esses ", "pelas ", "este ", "fosse ", "dele ", "tu ", "te ", "voces ", "vos ", "lhes ", "meus ", "minhas", "teu ", "tua", "teus", "tuas", "nosso ", "nossa", "nossos", "nossas", "dela ", "delas ", "esta ", "estes ", "estas ", "aquele ", "aquela ", "aqueles ", "aquelas ", "isto ", "aquilo ", "estou", "esta", "estamos", "estao", "estive", "esteve", "estivemos", "estiveram", "estava", "estavamos", "estavam", "estivera", "estiveramos", "esteja", "estejamos", "estejam", "estivesse", "estivessemos", "estivessem", "estiver", "estivermos", "estiverem", "hei", "há", "havemos", "hao", "houve", "houvemos", "houveram", "houvera", "houveramos", "haja", "hajamos", "hajam", "houvesse", "houvessemos", "houvessem", "houver", "houvermos", "houverem", "houverei", "houvera", "houveremos", "houverao", "houveria", "houveriamos", "houveriam", "sou", "somos", "sao", "era", "eramos", "eram", "fui", "foi", "fomos", "foram", "fora", "foramos", "seja", "sejamos", "sejam", "fosse", "fossemos", "fossem", "for", "formos", "forem", "serei", "sera", "seremos", "serao", "seria", "seriamos", "seriam", "tenho", "tem", "temos", "tem", "tinha", "tinhamos", "tinham", "tive", "teve", "tivemos", "tiveram", "tivera", "tiveramos", "tenha", "tenhamos", "tenham", "tivesse", "tivéssemos", "tivessem", "tiver", "tivermos", "tiverem", "terei", "tera", "teremos", "terao", "teria", "teriamos", "teriam"  };
+  static std::set<std::string> stop_words = {
+    "de", "a", "o", "que", "e", "do", "da", "em", "um", "para", "e", "com", 
+    "nao", "uma", "os", "no", "se", "na", "por", "mais", "as", "dos", "como", 
+    "mas", "foi", "ao", "ele", "das", "tem", "seu", "sua", "ou", "ser", "quando", 
+    "muito", "ha", "nos", "ja", "esta", "eu", "tambem", "so", "pelo", "pela", "ate", 
+    "isso", "ela", "entre", "era", "depois", "sem", "mesmo", "aos", "ter", "seus", 
+    "quem", "nas", "me", "esse", "eles", "estao", "voce", "tinha", "foram", "essa", 
+    "num", "nem", "suas", "meu", "às", "minha", "tem", "numa", "pelos", "elas", 
+    "havia", "seja", "qual", "sera", "nos", "tenho", "lhe", "deles", "essas", "esses", 
+    "pelas", "este", "fosse", "dele", "tu", "te", "voces", "vos", "lhes", "meus", "minhas", 
+    "teu", "tua", "teus", "tuas", "nosso", "nossa", "nossos", "nossas", "dela", "delas", "esta", 
+    "estes", "estas", "aquele", "aquela", "aqueles", "aquelas", "isto", "aquilo", "estou", 
+    "esta", "estamos", "estao", "estive", "esteve", "estivemos", "estiveram", "estava", "estavamos", 
+    "estavam", "estivera", "estiveramos", "esteja", "estejamos", "estejam", "estivesse", "estivessemos", 
+    "estivessem", "estiver", "estivermos", "estiverem", "hei", "há", "havemos", "hao", "houve", 
+    "houvemos", "houveram", "houvera", "houveramos", "haja", "hajamos", "hajam", "houvesse", 
+    "houvessemos", "houvessem", "houver", "houvermos", "houverem", "houverei", "houvera", "houveremos", 
+    "houverao", "houveria", "houveriamos", "houveriam", "sou", "somos", "sao", "era", "eramos", "eram", 
+    "fui", "foi", "fomos", "foram", "fora", "foramos", "seja", "sejamos", "sejam", "fosse", "fossemos", 
+    "fossem", "for", "formos", "forem", "serei", "sera", "seremos", "serao", "seria", "seriamos", 
+    "seriam", "tenho", "tem", "temos", "tem", "tinha", "tinhamos", "tinham", "tive", "teve", "tivemos", 
+    "tiveram", "tivera", "tiveramos", "tenha", "tenhamos", "tenham", "tivesse", "tivéssemos", "tivessem", 
+    "tiver", "tivermos", "tiverem", "terei", "tera", "teremos", "terao", "teria", "teriamos", "teriam"  
+  };
 
-  return std::find(stop_words.begin(), stop_words.end(), lexeme) != stop_words.end();
+  return stop_words.find(lexeme) != stop_words.end();
 }
 
 void Extractor::Parse(GumboNode* node, bool get_links) {
@@ -107,7 +129,7 @@ void Extractor::ExtractFromDoc(RawDocument& doc) {
 
   // Gumbo Parser does not handle XML very well.
   if (doc.content.find("<?xml") == doc_offset) {
-    logger_->Log("Skipping XML document: " + doc.url);
+    // logger_->Log("Skipping XML document: " + doc.url);
     return;
   }
 
@@ -174,17 +196,6 @@ std::string Extractor::NormalizeHyperlink(unsigned int doc_id, std::string& url)
   }
 
   return TruncateUrl(url);
-}
-
-void Extractor::Print(const std::string& filename) {
-  FILE* f = std::fopen(filename.c_str(), "rb");
-
-  int i = 0;
-  Tuple t;
-  while (fread(&t, sizeof(Tuple), 1, f) != 0) {
-    std::cout << "Tuple " << ++i << ": {" << t.lexeme_id << ", "
-              << t.document_id << ", " << t.word_position << "}" << std::endl;
-  }
 }
 
 void Extractor::PrintLexemes(RawDocument& doc) {

@@ -1,9 +1,8 @@
 #include <sstream>
 #include <algorithm>  
 #include "doc_collection.hpp"
-#include "lexicon.h"
 
-namespace TP1 {
+namespace InvertedIndex {
 
 DocCollection::DocCollection(std::shared_ptr<ILogger> logger)
   : logger_(logger) {

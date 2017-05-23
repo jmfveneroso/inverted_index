@@ -1,7 +1,8 @@
-#include "tuple.h"
+#include "tuple.hpp"
 
 using namespace std;
-using namespace TP1;
+
+namespace InvertedIndex {
 
 Tuple::Tuple () :
   lexeme_id(0),
@@ -18,14 +19,14 @@ Tuple::Tuple (const Tuple& tuple) :
   document_id(tuple.document_id),
   word_position(tuple.word_position) {}
 
-bool TP1::Tuple::operator== (const Tuple &m) const {
+bool Tuple::operator== (const Tuple &m) const {
   if (lexeme_id == m.lexeme_id && document_id == m.document_id && word_position == m.word_position)
     return true;
   else
     return false;  
 }
 
-bool TP1::Tuple::operator< (const Tuple &m) const {
+bool Tuple::operator< (const Tuple &m) const {
   if (lexeme_id == 0) return false;
   if (m.lexeme_id == 0) return true;
   if (lexeme_id != m.lexeme_id)
@@ -38,7 +39,7 @@ bool TP1::Tuple::operator< (const Tuple &m) const {
     return false;  
 }
 
-bool TP1::Tuple::operator> (const Tuple &m) const {
+bool Tuple::operator> (const Tuple &m) const {
   if (lexeme_id == 0) return true;
   if (m.lexeme_id == 0) return false;
   if (lexeme_id != m.lexeme_id)
@@ -50,3 +51,5 @@ bool TP1::Tuple::operator> (const Tuple &m) const {
   else
     return false;  
 }
+
+} // End of namespace.

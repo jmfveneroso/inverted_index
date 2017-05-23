@@ -5,7 +5,7 @@
 #include <string>
 #include <chrono>
 
-namespace TP1 {
+namespace InvertedIndex {
 
 using namespace std::chrono;
 

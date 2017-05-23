@@ -2,7 +2,7 @@
 #include <math.h>
 #include <cstring>
 
-namespace TP1 {
+namespace InvertedIndex {
 
 DocMap::DocMap(std::shared_ptr<ILogger> logger) 
   : logger_(logger) {

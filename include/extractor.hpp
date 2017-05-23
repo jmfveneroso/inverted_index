@@ -3,16 +3,16 @@
 
 #include "gumbo.h"
 #include "logger.hpp"
-#include "lexicon.h"
+#include "lexicon.hpp"
 #include "doc_map.hpp"
 #include "doc_collection.hpp"
-#include "tuple_sorter.h"
+#include "tuple_sorter.hpp"
 #include <memory>
 #include <stdio.h>
 #include <string>
 #include <vector>
 
-namespace TP1 {
+namespace InvertedIndex {
 
 class Extractor {
   std::shared_ptr<ILogger> logger_;
@@ -55,7 +55,6 @@ class Extractor {
   void ExtractFromDoc(RawDocument&);
   void Extract(const std::string&, const std::string&);
   void PrintLexemes(RawDocument&);
-  void Print(const std::string&);
   void Parse(const std::string&, bool get_links = false);
   void ReadDoc(unsigned int);
 };

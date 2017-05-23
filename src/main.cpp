@@ -1,6 +1,9 @@
 #include <iostream>
 #include "injector.hpp"
 
+using namespace std;
+using namespace InvertedIndex;
+
 int CommandRun(int argc, char* argv[]) {
   std::string what = argv[1];
   if (what == "extractor") {

@@ -2,14 +2,14 @@
 #define __DOC_MAP_HPP__
 
 #include "logger.hpp"
-#include "lexicon.h"
+#include "lexicon.hpp"
 #include "doc_collection.hpp"
 #include <memory>
 #include <stdio.h>
 #include <string>
 #include <set>
 
-namespace TP1 {
+namespace InvertedIndex {
 
 struct Document {
   std::string url;

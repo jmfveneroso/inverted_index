@@ -6,7 +6,7 @@
 #include <string>
 #include "logger.hpp"
 
-namespace TP1 {
+namespace InvertedIndex {
 
 struct RawDocument {
   std::string url;

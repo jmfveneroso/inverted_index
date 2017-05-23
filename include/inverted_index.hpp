@@ -7,9 +7,9 @@
 #include "logger.hpp"
 #include "extractor.hpp"
 #include "doc_collection.hpp"
-#include "tuple_sorter.h"
+#include "tuple_sorter.hpp"
 
-namespace TP1 {
+namespace InvertedIndex {
 
 struct InvertedIndexHeader {
   size_t num_blocks; 

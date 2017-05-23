@@ -1,10 +1,10 @@
-#include "lexicon.h"
+#include "lexicon.hpp"
 #include "utf8cpp/utf8.h"
 #include <cstring>
 
 using namespace std;
-using namespace TP1;
-using namespace utf8;
+
+namespace InvertedIndex {
 
 Lexicon::Lexicon(std::shared_ptr<ILogger> logger) 
   : logger_(logger), id_counter_(0) {
@@ -89,16 +89,6 @@ size_t Lexicon::GetNumLexemes() {
   return lexeme_map_.size();
 }
 
-struct Lexeme {
-  std::string lexeme;
-  off_t offset;  
-  off_t anchor_offset;  
-  size_t doc_frequency;
-  std::map<unsigned int, unsigned int> links;
-  Lexeme() {}
-  Lexeme(std::string lexeme) : lexeme(lexeme) {}
-};
-
 void Lexicon::Write(FILE* file, off_t offset) {
   fseeko(file, offset, SEEK_SET);
   for (size_t i = 1; i <= id_map_.size(); ++i) {
@@ -147,3 +137,5 @@ void Lexicon::Print() {
   for (; it != id_map_.end(); ++it)
     std::cout << "Lexeme " << it->first << ": " << it->second.lexeme << std::endl;
 }
+
+} // End of namespace.

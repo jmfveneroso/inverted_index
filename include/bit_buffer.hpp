@@ -1,8 +1,13 @@
+#ifndef _BIT_BUFFER_HPP_
+#define _BIT_BUFFER_HPP_
+
 #include <map>
 #include <iostream>
 #include <vector>
 #include <limits.h>
 #include <math.h>
+
+namespace InvertedIndex {
 
 class BitBuffer {
   std::vector<unsigned char> bytes;
@@ -103,3 +108,7 @@ class BitBuffer {
     std::cout << std::endl;
   }
 };
+
+} // End of namespace.
+
+#endif

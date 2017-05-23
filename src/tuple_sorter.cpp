@@ -1,14 +1,10 @@
-/**
- * TupleSorter object
- * @author: jmfveneroso@gmail.com.br
- */
-
-#include "tuple_sorter.h"
+#include "tuple_sorter.hpp"
 #include "bit_buffer.hpp"
 #include <sstream>
 
 using namespace std;
-using namespace TP1;
+
+namespace InvertedIndex {
 
 TupleSorter::TupleSorter(
   std::shared_ptr<ILogger> logger,
@@ -342,3 +338,5 @@ void TupleSorter::Sort() {
   logger_->Log("Finished sorting " + std::to_string(counter) + " tuples.");
   delete[] holding_block_.tuples;
 }
+
+} // End of namespace.

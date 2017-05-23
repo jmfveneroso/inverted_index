@@ -3,8 +3,7 @@
 #include "inverted_index.hpp"
 #include "boolean_model.hpp"
 
-using namespace std;
-using namespace TP1;
+namespace InvertedIndex {
 
 class Injector {
  static Injector* instance_;
@@ -33,6 +32,7 @@ class Injector {
     if (!instance_) instance_ = new Injector;
     return instance_;
   }
+
   std::shared_ptr<ILogger> logger() { return logger_; }
   std::shared_ptr<ILexicon> lexicon() { return lexicon_; }
   std::shared_ptr<IDocCollection> doc_collection() { return doc_collection_; }
@@ -44,3 +44,5 @@ class Injector {
 };
 
 Injector* Injector::instance_ = 0;
+
+} // End of namespace.
