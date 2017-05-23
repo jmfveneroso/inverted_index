@@ -40,6 +40,7 @@ class Extractor {
   std::string TruncateUrl(std::string);
   std::string GetRootUrl(std::string);
   std::string NormalizeHyperlink(unsigned int, std::string&);
+  bool IsStopWord(const std::string&);
 
  public:
   Extractor(
