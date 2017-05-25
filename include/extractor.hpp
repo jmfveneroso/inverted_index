@@ -55,6 +55,7 @@ class Extractor {
   void ReadDoc(unsigned int);
   std::string GetTitle(unsigned int);
   std::string GetShortTextAt(unsigned int, unsigned int);
+  std::string GetRawText(unsigned int);
 };
 
 } // End of namespace.

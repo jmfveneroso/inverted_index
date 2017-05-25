@@ -5,69 +5,91 @@ html(lang="en")
 head
   title Search Engine
   | <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  | <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 body
   .container-fluid(style="background: #fafafa; border-bottom: 1px solid #ebebeb")
     .row
-      div.col-lg-6
+      div.col-sm-6
         | <a class="navbar-brand" href="#" style="height: 74px; padding: 28px 28px;">TP3</a>
         div(style="padding: 12px; float: left;")
         .input-group(style="padding: 20px;")
           input.form-control(id="query-box" name="q" type="text" value="#{q}")
           span.input-group-addon
             span.glyphicon.glyphicon-search
-      div.col-lg-1
-        .checkbox(style="margin-top:27px; color: #808080; font-size: 13px")
-          label
-            input(id="anchor-rank" type="checkbox" checked=("#{anchorRank}" == "true" ? "checked" : undefined))
-            | Anchor
-      div.col-lg-2
-        .checkbox(style="margin-top:27px; color: #808080; font-size: 13px")
-          label
-            input(id="page-rank", type="checkbox", checked=("#{pageRank}" == "true" ? "checked" : undefined))
-            | Page Rank
-  .container
-    .row
-      .col-md-12
-        div(style="margin-left:90px; margin-top: 10px; margin-bottom: 15px; color: #808080")
-          small
-            span= 'Showing page ' + page + ' of ' + (parseInt(numResults / 10) + 1) + ' results (' + time + ' seconds)'
+      div.col-sm-1(style="padding: 20px;")
+        button.btn.btn-default(data-toggle="modal" data-target="#myModal")
+          span.glyphicon.glyphicon-cog
+  .row
+    .col-sm-8
+      div(style="margin-left:160px; margin-top: 10px; margin-bottom: 15px; color: #808080")
+        small
+          span= 'Showing page ' + page + ' of ' + numResults + ' results (' + time + ' seconds)'
 
-  .container
-    .row
-      .col-md-12
-        - for(key in results) {
-          div(style="margin-left:90px")
-            a(style="color: #1a0dab; font-size: 18px;" href= '/doc?id=' + results[key].id)= results[key].title
-            div(style="color: #006621; font-size: 14px")= results[key].url
-            div= results[key].shortText
-            br
-        - }
+  .row
+    .col-sm-8
+      - for(key in results) {
+        div(style="margin-left:160px")
+          a(style="color: #1a0dab; font-size: 18px;" href= '/doc?id=' + results[key].id)= results[key].title
+          div(style="color: #006621; font-size: 14px")= results[key].url + ' - ' + results[key].rank
+          div= results[key].shortText
+          br
+      - }
 
-  .container
-    .row
-      .col-md-12
-        div(style="margin-left:77px")
-          button.btn.btn-default(id="prev")
-            | Previous Page
-          span(style="padding:20px")
-          button.btn.btn-default(id="next")
-            | Next Page
+  .row
+    .col-sm-8
+      div(style="margin-left:145px")
+        button.btn.btn-default(id="prev")
+          | Previous Page
+        span(style="padding:20px")
+        button.btn.btn-default(id="next")
+          | Next Page
+
+  .modal.fade(id="myModal" tabindex="-1" role="dialog" aria-labelledby="modal" aria-hidden="true")
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h5.modal-title(id="exampleModalLabel")
+            | Settings
+        .modal-body
+          .form-group
+            label(for="example-text-input" class="col-2 col-form-label")
+              | Vector rank weight
+            .col-10
+              input.form-control(type="text" value="#{vectorRankW}" id="vector_rank_w")
+          .form-group
+            label(for="example-text-input" class="col-2 col-form-label")
+              | Anchor rank weight
+            .col-10
+              input.form-control(type="text" value="#{anchorRankW}" id="anchor_rank_w")
+          .form-group
+            label(for="example-text-input" class="col-2 col-form-label")
+              | Page rank weight
+            .col-10
+              input.form-control(type="text" value="#{pageRankW}" id="page_rank_w")
+        .modal-footer
+          button(id="save" type="button" class="btn btn-secondary" data-dismiss="modal")
+            | Save
 
   | <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
   | <script> 
   |   var queryBox = document.getElementById("query-box"); 
-  |   var pageRank = document.getElementById("page-rank"); 
-  |   var anchorRank = document.getElementById("anchor-rank"); 
+  |   var vectorRank = document.getElementById("vector_rank_w"); 
+  |   var pageRank = document.getElementById("page_rank_w"); 
+  |   var anchorRank = document.getElementById("anchor_rank_w"); 
+  |   var save = document.getElementById("save"); 
   |   var prev = document.getElementById("prev"); 
   |   var next = document.getElementById("next"); 
-  |   var page = isNaN(#{page}) ? 0 :  parseInt(#{page});
+  |   var page = isNaN(#{page}) ? 0 : parseInt(#{page});
   |   function reload () {
-  |     window.location = "?q=" + queryBox.value +
-  |     "&anchor=" + anchorRank.checked + "&pagerank=" + pageRank.checked +
+  |     window.location = "?q=" + queryBox.value + "&vector=" + vectorRank.value +
+  |     "&anchor=" + anchorRank.value + "&pagerank=" + pageRank.value +
   |     "&page=" + page
   |   }
   |   queryBox.addEventListener("change", reload);
+  |   queryBox.addEventListener("blur", reload);
+  |   save.addEventListener("click", reload);
   |   prev.addEventListener("click", function () { 
   |     if (page <= 1) return;
   |     page--; reload();

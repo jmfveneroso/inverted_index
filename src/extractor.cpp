@@ -326,4 +326,11 @@ std::string Extractor::GetShortTextAt(unsigned int doc_id, unsigned int position
   return short_text;
 }
 
+std::string Extractor::GetRawText(unsigned int doc_id) {
+  Document doc = doc_map_->GetDocById(doc_id);
+  RawDocument raw_doc = doc_collection_->Read(doc.file_num, doc.offset);
+
+  return raw_doc.content;
+}
+
 } // End of namespace.
