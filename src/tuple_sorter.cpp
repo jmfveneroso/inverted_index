@@ -339,4 +339,74 @@ void TupleSorter::Sort() {
   delete[] holding_block_.tuples;
 }
 
+void TupleSorter::Clear() {
+  tuple_blocks_.clear();
+  block_map_.clear();
+  holding_block_.num_tuples = 0;
+  holding_block_.tuples = new Tuple[MAX_TUPLES];
+}
+
+void TupleSorter::SortAnchorTuples() {
+  FillHeap();
+  size_t counter = 0;
+  while (!tuple_heap_.empty()) {
+    MergeTuple tuple = tuple_heap_.top();
+    tuple_blocks_[tuple.block_num].tuples_in_memory--;
+    tuple_heap_.pop();
+    WriteOutputTuple(tuple);
+    FillHeap();
+    if (++counter % 1000000 == 0) 
+      logger_->Log(std::to_string(counter) + " tuples sorted.");
+  }
+  FlushOutputBlock();
+
+  output_offset_ = tuple_blocks_[0].offset;
+  unsigned int last_lexeme_id = 0;
+  std::map<unsigned int, unsigned int> doc_frequency_map;
+
+  for (size_t i = 0; i < block_map_.size(); ++i) {
+    ReadBlock(block_map_[i]);
+
+    if (tuple_blocks_[i].is_output_block) {
+      CopyBlock(i, block_map_[i]);
+      block_map_[tuple_blocks_[i].output_pos] = block_map_[i];
+    } else {
+      std::stringstream ss;
+      ss << "Block " << i << " is being discarded since it is not an output block.";
+      logger_->Log(ss.str());
+    }
+
+    for (size_t j = 0; j < MAX_TUPLES; ++j) {
+      Tuple& tuple = holding_block_.tuples[j];
+      if (tuple.lexeme_id == 0) break;
+
+      if (tuple.lexeme_id != last_lexeme_id && last_lexeme_id != 0) {
+        fseeko(output_file_, output_offset_, SEEK_SET);
+        lexicon_->SetAnchorOffset(last_lexeme_id, output_offset_);
+
+        size_t num_docs = doc_frequency_map.size();
+        if (fwrite(&num_docs, sizeof(size_t), 1, output_file_) != 1)
+          throw new std::runtime_error("Error writing anchor index.");
+      
+        for (auto& it : doc_frequency_map) {
+          size_t num_written = fwrite(&it.first, sizeof(unsigned int), 1, output_file_);
+          num_written += fwrite(&it.second, sizeof(unsigned int), 1, output_file_);
+          if (num_written != 2) throw new std::runtime_error("Error writing anchor index.");
+        }
+        doc_frequency_map.clear();
+        output_offset_ = ftello(output_file_);
+      }
+
+      doc_frequency_map[tuple.document_id]++;
+      last_lexeme_id = tuple.lexeme_id;
+    }
+    std::stringstream ss;
+    ss << "Block " << i << " has been written to its final position.";
+    logger_->Log(ss.str());
+  }
+
+  logger_->Log("Finished sorting " + std::to_string(counter) + " anchor tuples.");
+  delete[] holding_block_.tuples;
+}
+
 } // End of namespace.

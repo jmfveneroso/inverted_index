@@ -1,5 +1,6 @@
 #include <sstream>
 #include <algorithm>  
+#include <cstring>  
 #include "doc_collection.hpp"
 
 namespace InvertedIndex {
@@ -102,13 +103,14 @@ RawDocument DocCollection::Read(size_t file_num, size_t offset) {
   if (!file_) throw std::runtime_error("Error opening file " + ss.str());
 
   fseeko(file_, offset, SEEK_SET);
+  offset_ = offset;
   RawDocument doc;
   char_buffer_.num_read = 0;
   char_buffer_.cursor = 0;
+  memset(char_buffer_.buffer, 0, 10000);
   GetNextDoc(&doc);
 
   return doc;
-  // std::cout << doc.content << std::endl;
 }
 
 void DocCollection::Rewind() {

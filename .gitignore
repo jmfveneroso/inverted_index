@@ -11,3 +11,5 @@ test.data
 /tex/report.pdf
 /tex/report.toc
 /tex/report.aux
+/server/node_modules
+/server/build

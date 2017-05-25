@@ -1,0 +1,78 @@
+doctype html
+
+html(lang="en")
+
+head
+  title Search Engine
+  | <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+body
+  .container-fluid(style="background: #fafafa; border-bottom: 1px solid #ebebeb")
+    .row
+      div.col-lg-6
+        | <a class="navbar-brand" href="#" style="height: 74px; padding: 28px 28px;">TP3</a>
+        div(style="padding: 12px; float: left;")
+        .input-group(style="padding: 20px;")
+          input.form-control(id="query-box" name="q" type="text" value="#{q}")
+          span.input-group-addon
+            span.glyphicon.glyphicon-search
+      div.col-lg-1
+        .checkbox(style="margin-top:27px; color: #808080; font-size: 13px")
+          label
+            input(id="anchor-rank" type="checkbox" checked=("#{anchorRank}" == "true" ? "checked" : undefined))
+            | Anchor
+      div.col-lg-2
+        .checkbox(style="margin-top:27px; color: #808080; font-size: 13px")
+          label
+            input(id="page-rank", type="checkbox", checked=("#{pageRank}" == "true" ? "checked" : undefined))
+            | Page Rank
+  .container
+    .row
+      .col-md-12
+        div(style="margin-left:90px; margin-top: 10px; margin-bottom: 15px; color: #808080")
+          small
+            span= 'Showing page ' + page + ' of ' + (parseInt(numResults / 10) + 1) + ' results (' + time + ' seconds)'
+
+  .container
+    .row
+      .col-md-12
+        - for(key in results) {
+          div(style="margin-left:90px")
+            a(style="color: #1a0dab; font-size: 18px;" href= '/doc?id=' + results[key].id)= results[key].title
+            div(style="color: #006621; font-size: 14px")= results[key].url
+            div= results[key].shortText
+            br
+        - }
+
+  .container
+    .row
+      .col-md-12
+        div(style="margin-left:77px")
+          button.btn.btn-default(id="prev")
+            | Previous Page
+          span(style="padding:20px")
+          button.btn.btn-default(id="next")
+            | Next Page
+
+  | <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  | <script> 
+  |   var queryBox = document.getElementById("query-box"); 
+  |   var pageRank = document.getElementById("page-rank"); 
+  |   var anchorRank = document.getElementById("anchor-rank"); 
+  |   var prev = document.getElementById("prev"); 
+  |   var next = document.getElementById("next"); 
+  |   var page = isNaN(#{page}) ? 0 :  parseInt(#{page});
+  |   function reload () {
+  |     window.location = "?q=" + queryBox.value +
+  |     "&anchor=" + anchorRank.checked + "&pagerank=" + pageRank.checked +
+  |     "&page=" + page
+  |   }
+  |   queryBox.addEventListener("change", reload);
+  |   prev.addEventListener("click", function () { 
+  |     if (page <= 1) return;
+  |     page--; reload();
+  |   });
+  |   next.addEventListener("click", function () { 
+  |     page++; reload();
+  |   });
+  | </script>

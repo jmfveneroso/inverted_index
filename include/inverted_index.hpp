@@ -24,6 +24,7 @@ class IInvertedIndex {
  public:
   ~IInvertedIndex() {}
  
+  virtual PostingsList GetPostingsList(unsigned int) = 0;
   virtual PostingsList GetPostingsList(const std::string&) = 0;
   virtual void CreateIndexForCollection(
     const std::string&, const std::string&
@@ -32,6 +33,8 @@ class IInvertedIndex {
   virtual void Sort(const std::string&) = 0;
   virtual void CreateAnchorIndex(const std::string&, const std::string&) = 0;
   virtual void Extract(const std::string&, const std::string&) = 0;
+  virtual std::map<unsigned int, unsigned int> GetAnchorRank(unsigned int) = 0;
+  virtual std::map<unsigned int, unsigned int> GetAnchorRank(const std::string&) = 0;
 };
 
 class InvertedIndex : public IInvertedIndex {
@@ -70,6 +73,8 @@ class InvertedIndex : public IInvertedIndex {
   void Load(const std::string&);
   void CreateAnchorIndex(const std::string&, const std::string&);
   void Extract(const std::string&, const std::string&);
+  std::map<unsigned int, unsigned int> GetAnchorRank(unsigned int);
+  std::map<unsigned int, unsigned int> GetAnchorRank(const std::string&);
 };
 
 } // End of namespace.

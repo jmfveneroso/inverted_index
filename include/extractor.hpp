@@ -24,13 +24,9 @@ class Extractor {
 
   FILE* input_file_ = NULL;
   FILE* output_file_ = NULL;
-  size_t num_tuples_ = 0;
-  size_t num_documents_ = 0;
-  size_t num_blocks_ = 0;
-  size_t block_size_ = 0;
-  size_t tuples_in_block_ = 0;
   unsigned int current_doc_id_ = 0;
   Tuple tuple_block_[MAX_TUPLES];
+  std::string doc_text_;
 
   std::string GetCleanText(GumboNode* node);
   void Parse(GumboNode* node, bool get_links = false);
@@ -57,6 +53,8 @@ class Extractor {
   void PrintLexemes(RawDocument&);
   void Parse(const std::string&, bool get_links = false);
   void ReadDoc(unsigned int);
+  std::string GetTitle(unsigned int);
+  std::string GetShortTextAt(unsigned int, unsigned int);
 };
 
 } // End of namespace.

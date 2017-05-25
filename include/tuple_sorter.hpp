@@ -57,6 +57,8 @@ class ITupleSorter {
   virtual void WriteTuple(Tuple&) = 0;
   virtual void FlushHoldingBlock() = 0;
   virtual void Sort() = 0;
+  virtual void SortAnchorTuples() = 0;
+  virtual void Clear() = 0;
   virtual void LoadBlocks(size_t, off_t) = 0;
   virtual size_t GetNumBlocks() = 0;
 };
@@ -91,6 +93,8 @@ class TupleSorter : public ITupleSorter {
   void WriteTuple(Tuple&);
   void FlushHoldingBlock();
   void Sort();
+  void SortAnchorTuples();
+  void Clear();
   void LoadBlocks(size_t, off_t);
   size_t GetNumBlocks() { return tuple_blocks_.size(); }
 };

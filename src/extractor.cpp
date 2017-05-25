@@ -56,17 +56,52 @@ bool Extractor::IsStopWord(const std::string& lexeme){
     "fossem", "for", "formos", "forem", "serei", "sera", "seremos", "serao", "seria", "seriamos", 
     "seriam", "tenho", "tem", "temos", "tem", "tinha", "tinhamos", "tinham", "tive", "teve", "tivemos", 
     "tiveram", "tivera", "tiveramos", "tenha", "tenhamos", "tenham", "tivesse", "tivéssemos", "tivessem", 
-    "tiver", "tivermos", "tiverem", "terei", "tera", "teremos", "terao", "teria", "teriamos", "teriam"  
+    "tiver", "tivermos", "tiverem", "terei", "tera", "teremos", "terao", "teria", "teriamos", "teriam",
+
+    // English.
+    "about", "above", "above", "across", "after", "afterwards", "again", "against", "all", 
+    "almost", "alone", "along", "already", "also","although","always","am","among", "amongst", 
+    "amoungst", "amount",  "an", "and", "another", "any","anyhow","anyone","anything","anyway", 
+    "anywhere", "are", "around", "as",  "at", "back","be","became", "because","become","becomes", 
+    "becoming", "been", "before", "beforehand", "behind", "being", "below", "beside", "besides", 
+    "between", "beyond", "bill", "both", "bottom","but", "by", "call", "can", "cannot", "cant", 
+    "co", "con", "could", "couldnt", "cry", "de", "describe", "detail", "do", "done", "down", 
+    "due", "during", "each", "eg", "eight", "either", "eleven","else", "elsewhere", "empty", 
+    "enough", "etc", "even", "ever", "every", "everyone", "everything", "everywhere", "except", 
+    "few", "fifteen", "fify", "fill", "find", "fire", "first", "five", "for", "former", "formerly", 
+    "forty", "found", "four", "from", "front", "full", "further", "get", "give", "go", "had", "has", 
+    "hasnt", "have", "he", "hence", "her", "here", "hereafter", "hereby", "herein", "hereupon", "hers", 
+    "herself", "him", "himself", "his", "how", "however", "hundred", "ie", "if", "in", "inc", "indeed", 
+    "interest", "into", "is", "it", "its", "itself", "keep", "last", "latter", "latterly", "least", 
+    "less", "ltd", "made", "many", "may", "me", "meanwhile", "might", "mill", "mine", "more", 
+    "moreover", "most", "mostly", "move", "much", "must", "my", "myself", "name", "namely", "neither", 
+    "never", "nevertheless", "next", "nine", "no", "nobody", "none", "noone", "nor", "not", "nothing", 
+    "now", "nowhere", "of", "off", "often", "on", "once", "one", "only", "onto", "or", "other", "others", 
+    "otherwise", "our", "ours", "ourselves", "out", "over", "own","part", "per", "perhaps", "please", 
+    "put", "rather", "re", "same", "see", "seem", "seemed", "seeming", "seems", "serious", "several", 
+    "she", "should", "show", "side", "since", "sincere", "six", "sixty", "so", "some", "somehow", 
+    "someone", "something", "sometime", "sometimes", "somewhere", "still", "such", "system", "take", 
+    "ten", "than", "that", "the", "their", "them", "themselves", "then", "thence", "there", "thereafter", 
+    "thereby", "therefore", "therein", "thereupon", "these", "they", "thickv", "thin", "third", "this", 
+    "those", "though", "three", "through", "throughout", "thru", "thus", "to", "together", "too", "top", 
+    "toward", "towards", "twelve", "twenty", "two", "un", "under", "until", "up", "upon", "us", "very", 
+    "via", "was", "we", "well", "were", "what", "whatever", "when", "whence", "whenever", "where", 
+    "whereafter", "whereas", "whereby", "wherein", "whereupon", "wherever", "whether", "which", 
+    "while", "whither", "who", "whoever", "whole", "whom", "whose", "why", "will", "with", "within", 
+    "without", "would", "yet", "you", "your", "yours", "yourself", "yourselves", "the"
   };
 
+  if (lexeme.size() <= 1 || lexeme.size() >= 30) return true;
   return stop_words.find(lexeme) != stop_words.end();
 }
 
 void Extractor::Parse(GumboNode* node, bool get_links) {
   if (node->type == GUMBO_NODE_TEXT) {  
     if (get_links) return;
-    std::vector<std::string> lexemes = Lexicon::ExtractLexemes(node->v.text.text);
-    lexemes_.insert(lexemes_.end(), lexemes.begin(), lexemes.end());
+    doc_text_ += node->v.text.text;
+    doc_text_ += " ";
+    // std::vector<std::string> lexemes = Lexicon::ExtractLexemes(node->v.text.text);
+    // lexemes_.insert(lexemes_.end(), lexemes.begin(), lexemes.end());
   }
 
   if (node->type != GUMBO_NODE_ELEMENT || node->v.element.tag == GUMBO_TAG_SCRIPT ||
@@ -88,16 +123,21 @@ void Extractor::Parse(GumboNode* node, bool get_links) {
   std::string anchor_text = GetCleanText(node);
   std::vector<std::string> lexemes = Lexicon::ExtractLexemes(anchor_text);
   for (auto lexeme : lexemes) { 
-    if (IsStopWord(lexeme)) continue;
-
     unsigned int lexeme_id = lexicon_->GetLexemeId(lexeme);
+    if (lexeme_id == 0) continue;
 
     std::string href_str = href->value;
     std::string normalized_link = NormalizeHyperlink(current_doc_id_, href_str);
     unsigned int doc_id = doc_map_->GetDocId(normalized_link);
+
+    // Ignore links pointing to documents outside the collection and
+    // self referring pages.
     if (doc_id == 0 || current_doc_id_ == doc_id) continue; 
 
-    lexicon_->AddLink(lexeme_id, doc_id);
+    Tuple tuple = Tuple(lexeme_id, doc_id, 0);
+    tuple_sorter_->WriteTuple(tuple);
+
+    // lexicon_->AddLink(lexeme_id, doc_id);
     doc_map_->AddOutboundLink(current_doc_id_, doc_id);
   }
 }
@@ -120,47 +160,50 @@ void Extractor::ExtractFromDoc(RawDocument& doc) {
     return; 
   }
 
-  unsigned int doc_id = doc_map_->AddDoc(new_doc);
+  // Gumbo Parser does not handle XML very well. So
+  // we will skip XML documents.
   size_t doc_offset = 0;
-  while (doc.content[doc_offset] == ' ') { 
+  while (
+    doc.content[doc_offset] == ' ' || 
+    doc.content[doc_offset] == '\n' || 
+    doc.content[doc_offset] == '\t'
+  ) { 
     doc_offset++;
     if (doc_offset >= doc.content.size()) break;
   }
-
-  // Gumbo Parser does not handle XML very well.
-  if (doc.content.find("<?xml") == doc_offset) {
-    // logger_->Log("Skipping XML document: " + doc.url);
+  if (doc.content.find("<?xml") == doc_offset) return;
+  if (doc.content.find("<") != doc_offset) {
+    logger_->Log("Document " + doc.url + " is not html.");
     return;
   }
 
+  unsigned int doc_id = doc_map_->AddDoc(new_doc);
   Parse(doc.content);
   unsigned int word_count = 0;
+  lexemes_ = Lexicon::ExtractLexemes(doc_text_);
   for (auto lexeme : lexemes_) {
+    ++word_count;
+    if (IsStopWord(lexeme)) continue;
     unsigned int lexeme_id = lexicon_->AddLexeme(lexeme);
-    Tuple tuple = Tuple(lexeme_id, doc_id, ++word_count);
+    Tuple tuple = Tuple(lexeme_id, doc_id, word_count);
     tuple_sorter_->WriteTuple(tuple);
   }
   lexemes_.clear();
+  doc_text_.clear();
 }
 
 void Extractor::ExtractLinks(RawDocument& doc) {
   current_doc_id_ = doc_map_->GetDocId(doc.url);
+
+  // We will only get links from pages that were indexed.
   if (current_doc_id_ == 0) {
     logger_->Log("Skipping links from: " + doc.url);
     return;
   }
 
-  size_t doc_offset = 0;
-  while (doc.content[doc_offset] == ' ') { 
-    doc_offset++;
-    if (doc_offset >= doc.content.size()) break;
-  }
-
-  // Gumbo Parser does not handle XML very well.
-  if (doc.content.find("<?xml") == doc_offset) return;
-
   Parse(doc.content, true);
   lexemes_.clear();
+  doc_text_.clear();
 }
 
 std::string Extractor::TruncateUrl(std::string url) {
@@ -201,11 +244,13 @@ std::string Extractor::NormalizeHyperlink(unsigned int doc_id, std::string& url)
 void Extractor::PrintLexemes(RawDocument& doc) {
   Parse(doc.content);
   unsigned int word_count = 0;
-  for (auto lexeme : lexemes_) {
+  std::vector<std::string> lexemes = Lexicon::ExtractLexemes(doc_text_);
+  for (auto lexeme : lexemes) {
     std::cout << "(" << ++word_count << ") " << lexeme << " ";
   }
   std::cout << std::endl;
   lexemes_.clear();
+  doc_text_.clear();
 }
 
 void Extractor::ReadDoc(unsigned int doc_id) {
@@ -214,6 +259,71 @@ void Extractor::ReadDoc(unsigned int doc_id) {
                " and offset " << doc.offset << std::endl;
   RawDocument raw_doc = doc_collection_->Read(doc.file_num, doc.offset);
   PrintLexemes(raw_doc);
+}
+
+std::string Extractor::GetTitle(unsigned int doc_id) {
+  Document doc = doc_map_->GetDocById(doc_id);
+  RawDocument raw_doc = doc_collection_->Read(doc.file_num, doc.offset);
+  GumboOutput* output = gumbo_parse(raw_doc.content.c_str());
+
+  const GumboVector* root_children = &output->root->v.element.children;
+  GumboNode* head = NULL;
+  for (size_t i = 0; i < root_children->length; ++i) {
+    GumboNode* child = (GumboNode*) root_children->data[i];
+    if ( 
+      child->type == GUMBO_NODE_ELEMENT &&
+      child->v.element.tag == GUMBO_TAG_HEAD
+    ) {
+      head = child;
+      break;
+    }
+  }
+  if (head == NULL) return "";
+
+  GumboVector* head_children = &head->v.element.children;
+  for (size_t i = 0; i < head_children->length; ++i) {
+    GumboNode* child = (GumboNode*) head_children->data[i];
+    if (child->type == GUMBO_NODE_ELEMENT &&
+        child->v.element.tag == GUMBO_TAG_TITLE) {
+      if (child->v.element.children.length != 1) {
+        gumbo_destroy_output(&kGumboDefaultOptions, output);
+        return "";
+      }
+      GumboNode* title_text = (GumboNode*) child->v.element.children.data[0];
+      if (
+        title_text->type != GUMBO_NODE_TEXT && 
+        title_text->type != GUMBO_NODE_WHITESPACE
+      ) { 
+        return "";
+      }
+      std::string title = title_text->v.text.text;
+      gumbo_destroy_output(&kGumboDefaultOptions, output);
+      return title;
+    }
+  }
+
+  gumbo_destroy_output(&kGumboDefaultOptions, output);
+  return "";
+}
+
+std::string Extractor::GetShortTextAt(unsigned int doc_id, unsigned int position) {
+  Document doc = doc_map_->GetDocById(doc_id);
+  RawDocument raw_doc = doc_collection_->Read(doc.file_num, doc.offset);
+
+  Parse(raw_doc.content);
+  std::vector<std::string> lexemes = Lexicon::ExtractLexemes(doc_text_);
+
+  unsigned int start = ((int) position - 11 >= 0) ? position - 11 : 0;
+  unsigned int end = (position + 10 < lexemes.size()) ? position + 10 : lexemes.size();
+
+  std::string result;
+  start = Lexicon::lexeme_offsets[start];
+  end = Lexicon::lexeme_offsets[end];
+  
+  std::string short_text = doc_text_.substr(start, end - start);
+  lexemes_.clear();
+  doc_text_.clear();
+  return short_text;
 }
 
 } // End of namespace.

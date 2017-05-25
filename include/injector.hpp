@@ -1,7 +1,7 @@
 #include "doc_map.hpp"
 #include "extractor.hpp"
 #include "inverted_index.hpp"
-#include "boolean_model.hpp"
+#include "ranker.hpp"
 
 namespace InvertedIndex {
 
@@ -14,7 +14,7 @@ class Injector {
  std::shared_ptr<ITupleSorter> tuple_sorter_;
  std::shared_ptr<Extractor> extractor_;
  std::shared_ptr<IInvertedIndex> inverted_index_;
- std::shared_ptr<BooleanModel> boolean_model_;
+ std::shared_ptr<Ranker> ranker_;
 
  public:
   Injector() 
@@ -25,7 +25,7 @@ class Injector {
       tuple_sorter_(std::make_shared<TupleSorter>(logger_, lexicon_)),
       extractor_(std::make_shared<Extractor>(logger_, lexicon_, doc_map_, tuple_sorter_, doc_collection_)),
       inverted_index_(std::make_shared<InvertedIndex>(logger_, doc_collection_, doc_map_, lexicon_, extractor_, tuple_sorter_)),
-      boolean_model_(std::make_shared<BooleanModel>(inverted_index_, doc_map_, lexicon_)) {
+      ranker_(std::make_shared<Ranker>(inverted_index_, doc_map_, lexicon_, extractor_)) {
   }
 
   static Injector* Instance() {
@@ -40,7 +40,7 @@ class Injector {
   std::shared_ptr<ITupleSorter> tuple_sorter() { return tuple_sorter_; }
   std::shared_ptr<Extractor> extractor() { return extractor_; }
   std::shared_ptr<IInvertedIndex> inverted_index() { return inverted_index_; }
-  std::shared_ptr<BooleanModel> boolean_model() { return boolean_model_; }
+  std::shared_ptr<Ranker> ranker() { return ranker_; }
 };
 
 Injector* Injector::instance_ = 0;

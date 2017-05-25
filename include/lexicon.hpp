@@ -15,7 +15,7 @@ namespace InvertedIndex {
 struct Lexeme {
   std::string lexeme;
   off_t offset;  
-  off_t anchor_offset;  
+  off_t anchor_offset = 0;  
   size_t doc_frequency;
   size_t anchor_refs;
   std::map<unsigned int, unsigned int> links;
@@ -38,7 +38,6 @@ class ILexicon {
   virtual void SetOffset(unsigned int, off_t) = 0;
   virtual void SetAnchorOffset(unsigned int, off_t) = 0;
   virtual void SetDocFrequency(unsigned int, size_t) = 0;
-  virtual void AddLink(unsigned int, size_t) = 0;
 };
 
 class Lexicon : public ILexicon{
@@ -60,16 +59,13 @@ class Lexicon : public ILexicon{
   void Load(FILE*, off_t, size_t);
   void Print();
 
-  void SetOffset(unsigned int id, off_t offset) { id_map_[id].offset = offset; }
-  void SetAnchorOffset(unsigned int id, off_t offset) { id_map_[id].anchor_offset = offset; }
-  void SetDocFrequency(unsigned int id, size_t doc_freq) { id_map_[id].doc_frequency = doc_freq; }
-  void AddLink(unsigned int id, size_t link_id) { 
-    if (id_map_[id].links.find(link_id) == id_map_[id].links.end()) 
-      id_map_[id].links[link_id] = 0;
-    id_map_[id].links[link_id]++;
-  }
+  void SetOffset(unsigned int id, off_t offset) { id_map_.find(id)->second.offset = offset; }
+  void SetAnchorOffset(unsigned int id, off_t offset) { id_map_.find(id)->second.anchor_offset = offset; }
+  void SetDocFrequency(unsigned int id, size_t doc_freq) { id_map_.find(id)->second.doc_frequency = doc_freq; }
 
+  static std::vector<size_t> lexeme_offsets;
   static char GetValidCharacter(int);
+  static void ClearOffsets();
   static std::vector<std::string> ExtractLexemes(std::string);
 };
   
