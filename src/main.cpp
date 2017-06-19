@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "injector.hpp"
 
 using namespace std;
@@ -141,6 +142,29 @@ int CommandRun(int argc, char* argv[]) {
     }
     return 0;
   }
+
+  if (what == "trec") {
+    if (argc < 5) {
+      std::cout << "usage: search trec <documents-directory> <inverted-index> <queries_file>" << endl;
+      return 1;
+    }
+
+    Injector::Instance()->doc_collection()->Init(argv[2]);
+    Injector::Instance()->inverted_index()->Load(argv[3]);
+    std::ifstream infile(argv[4]);
+    std::string line;
+    size_t counter = 1;
+    while (std::getline(infile, line)) {
+      std::cout << line << std::endl;
+      Injector::Instance()->ranker()->Search(line, 1000, 200, 10);
+      std::vector<QueryResult> results = Injector::Instance()->ranker()->GetPageOfResults(1, 10);
+      size_t i = 1;
+      for (auto r : results)
+        std::cout << "Q" << counter << " " << i++ << " " << r.id << " " << r.url << " " << r.rank << std::endl;
+      counter++;
+    } 
+    return 0;
+  }
   return 1;
 }
 
@@ -156,4 +180,5 @@ int main(int argc, char *argv[]) {
   std::cout << "    search anchor <documents-directory> <out_file>" << endl;
   std::cout << "    search inverted-index <documents-directory> <out_file>" << endl;
   std::cout << "    search load <documents-directory> <inverted-index>" << endl;
+  std::cout << "    search trec <documents-directory> <inverted-index> <queries-file>" << endl;
 }

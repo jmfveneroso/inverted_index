@@ -33,9 +33,9 @@ var query;
 
 // At root we return a view with the query results.
 app.get('/', function (req, res) {
-  var vectorRank = req.query.vector || 1;
-  var anchorRank = req.query.anchor || 0;
-  var pageRank = req.query.pagerank || 0;
+  var vectorRank = req.query.vector || 1000;
+  var anchorRank = req.query.anchor || 100;
+  var pageRank = req.query.pagerank || 10;
   var page = parseInt(req.query.page) || 1;
 
   var arr = [];

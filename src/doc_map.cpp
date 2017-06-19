@@ -69,7 +69,7 @@ void DocMap::CalculatePageRank() {
     for (size_t j = 1; j < doc_map_.size(); ++j) {
       Document& doc = doc_map_[j];
 
-      // Is sink. Add to glboal rank.
+      // Is sink. Add to global rank.
       if (doc.outbound_links.size() == 0) {
         global_rank += doc.page_rank / doc_map_.size();
         continue;
