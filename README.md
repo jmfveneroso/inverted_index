@@ -66,3 +66,23 @@ The number in parenthesis is the document id. To read document 10687 for example
 ```
 $ Query >> read 10687
 ```
+
+**Running the server**
+
+To run the server, you need first to install the node JS dependencies. In Ubuntu, run:
+
+```
+sudo apt-get install nodejs
+```
+
+Then, run inside the server directory:
+
+```
+npm install
+```
+
+Finally to start the server, still inside the server directory, run:
+
+```
+nodejs server.js <collection_directory> <inverted_index>
+```
