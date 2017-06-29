@@ -837,7 +837,7 @@ iprec_at_recall_0.90 0
 iprec_at_recall_1.00 0
 Query all
 num_ret 28575
-num_rel 5088293
+num_rel 247
 num_rel_ret 180
 map 0.301368
 NDCG_5 0.575607

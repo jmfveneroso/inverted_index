@@ -13998,7 +13998,6 @@
 15 998 546359 zankyou.com.br/casamentos 252.665
 15 999 5647514 ibroken.com.br/produtos-index/categorias/842089/nano_7th.html 252.665
 15 1000 1787173 zankyou.com.br/flores-casamento 252.588
-[419302] /mnt/hd0/joao_test/collection/html_2
 16 1 4938345 perfumes.com.br 4720.08
 16 2 4700292 gotoshop.com.br/Moda/AcessoriosdeModa/OculosdeSol/?Filtro=C1734_C2050_C854&nid=200281 2888.49
 16 3 1861141 gotoshop.com.br/Relogios/?Filtro=C1733 2840.57

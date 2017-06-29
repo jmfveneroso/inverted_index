@@ -179,7 +179,7 @@ O servidor responde requisições nas rotas:
 
 A página inicial conta com uma caixa de texto onde o usuário pode fazer consultas. A figura \ref{fig:page_1}
 mostra um exemplo de consulta. 
-Um ícone à esquerda da caixa de consultas abre um modal onde os pesos relativos dos modelos de \textit{ranking}
+Um ícone à direita da caixa de consultas abre um modal onde os pesos relativos dos modelos de \textit{ranking}
 podem ser ajustados (basta colocar zero no campo para desativar um modelo), como mostrado na figura
 \ref{fig:page_1_modal}. A página só mostra 
 10 resultados. Para navegar pelas próximas páginas de resultados é necessário clicar nos botões
@@ -209,40 +209,80 @@ Parâmetros:
 
 \section{Experimentos}
 
-\subsection{vivo}
-\subsection{itau}
-\subsection{uol}
-\subsection{g1}
+\begin{table}
+\centering
+\begin{tabular}{ |l|l|l|l|l| }
+  \hline
+  \multicolumn{1}{|c|}{Estatística} & VEC & VEC+ANCHOR & VEC+PAGERANK & COMPLETE \\
+  \hline
+  num\_ret                 & 28574 & 28575 & 28576 & 28572 \\
+  num\_rel                 & 247   & 247   & 247   & 247   \\
+  num\_rel\_ret            & 126   & 180   & 125   & 178   \\
+  map                      & 0.156 & 0.301 & 0.044 & 0.300 \\
+  NDCG\_5                  & 0.328 & 0.576 & 0.080 & 0.596 \\
+  P\_5                     & 0.252 & 0.413 & 0.039 & 0.413 \\
+  P\_10                    & 0.165 & 0.374 & 0.045 & 0.387 \\
+  P\_15                    & 0.118 & 0.262 & 0.047 & 0.264 \\
+  P\_20                    & 0.094 & 0.198 & 0.040 & 0.205 \\
+  P\_30                    & 0.065 & 0.133 & 0.037 & 0.138 \\
+  P\_50                    & 0.045 & 0.083 & 0.025 & 0.084 \\
+  P\_100                   & 0.028 & 0.045 & 0.020 & 0.045 \\
+  P\_200                   & 0.016 & 0.024 & 0.013 & 0.024 \\
+  P\_500                   & 0.007 & 0.011 & 0.006 & 0.011 \\
+  P\_1000                  & 0.004 & 0.006 & 0.004 & 0.006 \\
+  iprec\_at\_recall\_0.00  & 0.461 & 0.589 & 0.097 & 0.580 \\
+  iprec\_at\_recall\_0.10  & 0.396 & 0.567 & 0.097 & 0.567 \\
+  iprec\_at\_recall\_0.20  & 0.331 & 0.527 & 0.093 & 0.529 \\
+  iprec\_at\_recall\_0.30  & 0.236 & 0.472 & 0.071 & 0.473 \\
+  iprec\_at\_recall\_0.40  & 0.121 & 0.400 & 0.057 & 0.407 \\
+  iprec\_at\_recall\_0.50  & 0.108 & 0.341 & 0.055 & 0.345 \\
+  iprec\_at\_recall\_0.60  & 0.084 & 0.298 & 0.038 & 0.300 \\
+  iprec\_at\_recall\_0.70  & 0.064 & 0.183 & 0.029 & 0.179 \\
+  iprec\_at\_recall\_0.80  & 0.046 & 0.108 & 0.025 & 0.104 \\
+  iprec\_at\_recall\_0.90  & 0.017 & 0.064 & 0.010 & 0.058 \\
+  iprec\_at\_recall\_1.00  & 0.017 & 0.047 & 0.009 & 0.043 \\
+  \hline
+\end{tabular}
+\caption{Resultados gerais}
+\label{tab:general_results}
+\end{table}
 
-Não há resultados para essa pesquisa, porque o índice desconsidera
-palavras com menos de três caracteres.
+Os experimentos mediram o desempenho de quatro modelos em 30 consultas. Os modelos testados são: 
+modelo vetorial (VEC), modelo vetorial com \textit{anchor texts} (VEC+ANCHOR), 
+modelo vetorial com \textit{page rank} (VEC+PAGERANK) e o modelo vetorial com \textit{anchor texts} e \textit{page rank} (COMPLETE).
+Antes de analisar os resultados das consultas específicas, a tabela \ref{tab:general_results} descreve
+os resultados gerais dos quatro modelos. Cada estatística representa a média para
+as 30 consultas naquele modelo. O modelo que alcançou a melhor \textit{Mean Average Precision} 
+foi o VEC+ANCHOR, no entanto, o modelo COMPLETE alcançou um NDCG maior. O NDCG é uma estatística mais completa, pois mede graus de relevância. 
+Além disso, em uma consulta na \textit{web} os usuários estão mais interessados nos primeiros resultados da busca, portanto,
+o NDCG dos primeiros 5 documentos mede bem a capacidade do nosso modelo em sanar a necessidade informacional
+dos usuários. Dito isso, o modelo que teve o melhor resultado geral foi o COMPLETE. Cabe ressaltar que o cálculo do NDCG
+utilizou apenas as avaliações feitas pelos alunos, novas avaliações não foram feitas para documentos que não haviam
+sido ranqueados no esforço conjunto.
 
-\subsection{banco brasil}
-\subsection{belo horizonte}
-\subsection{folha}
-\subsection{decolar}
-\subsection{Pokemon GO}
-\subsection{Jogos Olímpicos Rio 2016}
-\subsection{Big Brother Brasil}
-\subsection{Tabela do Brasileirão}
-\subsection{Enem}
-\subsection{Sisu}
-\subsection{iPhone 7}
-\subsection{Ana Hickmann}
-\subsection{Donald Trump}
-\subsection{Renato Aragão}
-\subsection{Camila Pitanga}
-\subsection{Diego Hypólito}
-\subsection{Logan}
-\subsection{A bela e a fera}
-\subsection{Power Rangers}
-\subsection{o que é crush}
-\subsection{o que é amor}
-\subsection{o que é filosofia}
-\subsection{como fazer crepioca}
-\subsection{como fazer bolo}
-\subsection{como fazer bolo de pote}
-\subsection{por que o feijão esta tão caro}
+O \textit{page rank} sozinho acabou piorando os resultados do modelo vetorial. Isso se deve provavelmente à 
+algumas particularidades da nossa coleção e à forma como é feita a interpolação entre os modelos.
+O \textit{page rank} é uma estatística que ajuda bastante em consultas navegacionais como "vivo" e "uol", no entanto, a nossa
+coleção não possui as páginas "vivo.com.br" e "uol.com.br", então páginas com baixa relevância acabam sendo classificadas como
+\textit{hubs}. Além disso, a interpolação linear entre o modelo vetorial e o \textit{page rank} acaba dando um peso muito grande
+para o \textit{page rank} em todas as consultas.
+
+A nossa máquina de busca não indexa termos com menos de 3 caracteres, números ou \textit{stop words}, portanto, consultas
+como "g1" não retornaram nenhum resultado. As consultas "o que é crush" e "por que o feijão está caro" não tiveram documentos
+relevantes classificados, portanto, sua análise fica prejudicada. E, a maior parte das consultas tiveram um número muito baixo
+de relevantes classificados.
+
+Ignorando as excessões descritas no parágrafo anterior, vamos analisar as duas consultas que tiveram o pior desempenho e as
+duas consultas que tiveram o melhor desempenho no modelo COMPLETE com base no NDCG\_5. As piores consultas foram "banco brasil",
+com NDCG 0.22, e "como fazer crepioca" com NDCG 0.20 e, as melhores consultas foram "sisu", com NDCG 1.00, e "folha", com
+NDCG 0.85. Além dos motivos listados anteriormente, o NDCG é um índice interessante, pois ele mostra quão próxima do melhor resultado
+possível está nossa máquina de busca.
+
+Primeiramente, o desempenho da consulta "como fazer crepioca" provavelmente foi ruim porque esta consulta tem um grau de dificuldade
+maior do que as outras. O usuário não está interessado meramente em uma página sobre crepiocas, mas em uma página que contenha receitas
+de crepiocas. O modelo COMPLETE retornou 9 das 10 páginas relevantes, no entanto, ele não foi competente em classificá-las nas primeiras
+posições.
+
 
 \section{Conclusão}
 
