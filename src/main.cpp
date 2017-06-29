@@ -161,13 +161,12 @@ int CommandRun(int argc, char* argv[]) {
     std::string line;
     size_t counter = 1;
     while (std::getline(infile, line)) {
-      std::cout << line << std::endl;
       Injector::Instance()->ranker()->set_retrieve_short_text(false);
-      Injector::Instance()->ranker()->Search(line, 1000, 100, 10);
+      Injector::Instance()->ranker()->Search(line, 1000, 0, 10);
       std::vector<QueryResult> results = Injector::Instance()->ranker()->GetPageOfResults(1, 1000);
       size_t i = 1;
       for (auto r : results)
-        std::cout << "Q" << counter << " " << i++ << " " << r.id << " " << r.url << " " << r.rank << std::endl;
+        std::cout << counter << " " << i++ << " " << r.id << " " << r.url << " " << r.rank << std::endl;
       counter++;
     } 
     return 0;
