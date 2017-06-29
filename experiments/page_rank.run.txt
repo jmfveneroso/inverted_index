@@ -13998,7 +13998,6 @@
 15 998 546359 zankyou.com.br/casamentos 252.665
 15 999 5647514 ibroken.com.br/produtos-index/categorias/842089/nano_7th.html 252.665
 15 1000 1787173 zankyou.com.br/flores-casamento 252.588
-[419302] /mnt/hd0/joao_test/collection/html_2
 16 1 4938345 perfumes.com.br 4720.08
 16 2 4700292 gotoshop.com.br/Moda/AcessoriosdeModa/OculosdeSol/?Filtro=C1734_C2050_C854&nid=200281 2888.49
 16 3 1861141 gotoshop.com.br/Relogios/?Filtro=C1733 2840.57
@@ -18571,7 +18570,6 @@
 20 570 1243488 lauriberto.blogspot.com.br/2009_08_16_archive.html 22.0981
 20 571 1536966 livros.gospelmais.com.br/livros-evangelicos 20.9226
 20 572 5488383 fudas.com.br/categoria/humor 14.0104
-[458280] /mnt/hd0/joao_test/collection/html_3
 21 1 1481237 dublanet.com.br/forum1/activity.php 3020.41
 21 2 253906 secretsun.blogspot.com.br 2830.65
 21 3 13135 meninadabahia.com.br 1914.72
@@ -19572,7 +19570,6 @@
 21 998 2585060 matracacultural.com.br/logan-e-a-emocionante-despedida-de-hugh-jackman 158.925
 21 999 86034 allisonkayphotography.blogspot.com.br/2014/11 158.823
 21 1000 2286660 maisinfluente.com.br/2017/02/22/hugh-jackman-participa-de-coletiva-do-filme-logan-em-sao-paulo 158.806
-[467168] /mnt/hd0/joao_test/collection/html_4
 22 1 1770335 itmae.uol.com.br/baby-and-kids/cultura-e-diversao 39168.5
 22 2 482812 blog.passarela.com.br 17945.4
 22 3 398490 ciadoslivros.com.br 7489.64
@@ -20573,7 +20570,6 @@
 22 998 5576268 justlia.com.br/tag/dafiti 246.609
 22 999 569668 cinemais.com.br/produtos/anuncie.php 246.586
 22 1000 1020467 angelicalembrancinhas.com.br/cadastro_cliente 246.565
-[473003] /mnt/hd0/joao_test/collection/html_5
 23 1 1865967 gotoshop.com.br/malasemochilas/?Filtro=C1813 2867.13
 23 2 4357066 gotoshop.com.br/malasmochilas/Mochilasparaviagem/?Filtro=C1813_C1830 2828.58
 23 3 665940 ziggi.uol.com.br 2423.45
