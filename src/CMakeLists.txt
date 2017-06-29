@@ -4,7 +4,7 @@ link_directories(${CMAKE_SOURCE_DIR}/lib/gumbo_parser/lib)
 set(SRC 
   inverted_index.cpp ranker.cpp extractor.cpp
   doc_collection.cpp lexicon.cpp tuple_sorter.cpp
-  doc_map.cpp tuple.cpp 
+  doc_map.cpp evaluator.cpp tuple.cpp 
 )
 
 # Make a library to generalize the inverted index.

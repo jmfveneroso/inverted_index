@@ -69,6 +69,12 @@ int CommandRun(int argc, char* argv[]) {
         Injector::Instance()->extractor()->ReadDoc(doc_id);
         continue;
       }
+      if (input.find("url ") == 0) { 
+        std::string url = input.substr(4);
+        unsigned int doc_id = Injector::Instance()->doc_map()->GetDocId(url);
+        std::cout << "Doc id: " << doc_id << std::endl; 
+        continue;
+      }
 
       if (input.find("lexeme ") == 0) { 
         unsigned int lexeme_id = std::atoi(input.substr(7).c_str());
@@ -143,9 +149,9 @@ int CommandRun(int argc, char* argv[]) {
     return 0;
   }
 
-  if (what == "trec") {
+  if (what == "run") {
     if (argc < 5) {
-      std::cout << "usage: search trec <documents-directory> <inverted-index> <queries_file>" << endl;
+      std::cout << "usage: search run <documents-directory> <inverted-index> <queries_file>" << endl;
       return 1;
     }
 
@@ -156,13 +162,24 @@ int CommandRun(int argc, char* argv[]) {
     size_t counter = 1;
     while (std::getline(infile, line)) {
       std::cout << line << std::endl;
-      Injector::Instance()->ranker()->Search(line, 1000, 200, 10);
-      std::vector<QueryResult> results = Injector::Instance()->ranker()->GetPageOfResults(1, 10);
+      Injector::Instance()->ranker()->set_retrieve_short_text(false);
+      Injector::Instance()->ranker()->Search(line, 1000, 100, 10);
+      std::vector<QueryResult> results = Injector::Instance()->ranker()->GetPageOfResults(1, 1000);
       size_t i = 1;
       for (auto r : results)
         std::cout << "Q" << counter << " " << i++ << " " << r.id << " " << r.url << " " << r.rank << std::endl;
       counter++;
     } 
+    return 0;
+  }
+
+  if (what == "eval") {
+    if (argc < 4) {
+      std::cout << "usage: search eval <qrels-file> <results-file>" << endl;
+      return 1;
+    }
+
+    Injector::Instance()->evaluator()->Eval(argv[2], argv[3]);
     return 0;
   }
   return 1;
@@ -171,6 +188,7 @@ int CommandRun(int argc, char* argv[]) {
 int main(int argc, char *argv[]) {
   if (argc >= 2) {  
     if (CommandRun(argc, argv) == 0) return 0;
+    return 1;
   }
 
   std::cout << "usage: search <command>" << endl;
@@ -180,5 +198,6 @@ int main(int argc, char *argv[]) {
   std::cout << "    search anchor <documents-directory> <out_file>" << endl;
   std::cout << "    search inverted-index <documents-directory> <out_file>" << endl;
   std::cout << "    search load <documents-directory> <inverted-index>" << endl;
-  std::cout << "    search trec <documents-directory> <inverted-index> <queries-file>" << endl;
+  std::cout << "    search run <documents-directory> <inverted-index> <queries-file>" << endl;
+  std::cout << "    search eval <qrels-file> <results-file>" << endl;
 }

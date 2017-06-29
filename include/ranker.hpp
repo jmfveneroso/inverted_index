@@ -39,6 +39,7 @@ class Ranker {
   std::vector<unsigned int> query_lexeme_ids_;
   std::map<unsigned int, QueryResult> query_results_;
   std::vector<unsigned int> sorted_results_;
+  bool retrieve_short_text_ = true;
 
   void SortQueryTerms();
   void ProcessQueryTerms();
@@ -55,6 +56,7 @@ class Ranker {
     std::shared_ptr<Extractor> extractor
   );
 
+  void set_retrieve_short_text(bool flag) { retrieve_short_text_ = flag; }
   void Search(const std::string&, double, double, double);
   std::vector<QueryResult> GetPageOfResults(size_t page_num = 1, size_t results_per_page = 10);
   size_t GetNumResults() { return query_results_.size(); }

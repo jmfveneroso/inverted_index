@@ -138,8 +138,10 @@ std::vector<QueryResult> Ranker::GetPageOfResults(size_t page_num, size_t result
     QueryResult& result = query_results_[doc_id];
     result.url = doc_map_->GetDocById(doc_id).url;
     result.title = extractor_->GetTitle(doc_id);
-    std::sort(result.positions.begin(), result.positions.end());
-    result.short_text = extractor_->GetShortTextAt(doc_id, result.positions[0]);
+    if (retrieve_short_text_) {
+      std::sort(result.positions.begin(), result.positions.end());
+      result.short_text = extractor_->GetShortTextAt(doc_id, result.positions[0]);
+    }
     results.push_back(result);
   }  
   return results;
