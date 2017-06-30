@@ -21,13 +21,13 @@
 \section{Introdução}
 
 Este trabalho descreve a implementação de um sistema de consultas com base no arquivo
-invertido criado no trabalho prático 2. O sistema de consulta implementado faz 
-consultas ordenadas por meio do modelo de espaço vetorial com a utilização do
-anchor text e do page rank para melhoria dos resultados. A interface gráfica do sistema
-de consultas foi implementada com o NodeJS e está disponível para consultas na
+invertido criado no trabalho prático 2. O sistema implementado faz 
+consultas ordenadas por meio do modelo de espaço vetorial com a utilização de informação dos
+\textit{anchor texts} e do \textit{page rank} para melhoria dos resultados. A interface gráfica do sistema
+de consultas foi implementada em NodeJS e está disponível para consultas na
 url visconde.latin.dcc.ufmg.br:8080. A versão mais recente do código pode ser obtida
 em: https://github.com/jmfveneroso/inverted-index. Para instruções de compilação e uso, leia
-o arquivo README.md. 
+o arquivo README.md.
 
 \section{Índice invertido}
 
@@ -141,12 +141,12 @@ O valor do \textit{Page Rank} é armazenado no mapa de documentos e pode servir 
 relevância. No entanto, os resultados são melhores quando ele é usado em associação com outro método como o modelo
 de espaço vetorial. Como a ordem de grandeza dos valores artibuídos pelo \textit{Page Rank} acaba sendo muito maior
 do que o peso atribuído pelo modelo de espaço vetorial, é necessário usar um fator de normalização, como explicado
-na seção 2. O \textit{Page Rank} se mostrou um sinal ainda mais eficiente quando utilizado
-em combinação com o índice de \textit{anchor texts}.
+na seção 2. O \textit{Page Rank} não se mostrou um sinal muito eficiente nas consultas de teste, provavelmente por
+conta do tamanho limitado da coleção e do viés de seleção das páginas pelos \textit{web crawlers}.
 
 \section{Servidor e interface gráfica}
 
-O servidor da máquina de busca foi implementado no \textit{NodeJS}, um \textit{runtime environment} 
+O servidor da máquina de busca foi implementado em \textit{NodeJS}, um \textit{runtime environment} 
 que executa \textit{Javascript} do lado do servidor. Um módulo do \textit{node-gyp} foi construído
 para transformar a máquina de busca (C++) em uma biblioteca do \textit{Javascript}. O servidor
 utiliza o \textit{framework} Express para responder às requisições http e a linguagem de marcação 
@@ -154,7 +154,7 @@ Jade para construir a interface gráfica.
 
 O servidor responde requisições nas rotas:
 
-\subsubsection{GET /}
+\subsection{GET /}
 
 \begin{figure}
 \centering
@@ -197,7 +197,7 @@ Parâmetros:
   \item page = página atual da consulta (padrão = 1)
 \end{itemize}
 
-\subsubsection{GET /doc}
+\subsection{GET /doc}
 A rota /doc mostra o conteúdo de um documento. Como o html extraído pelo crawler pode conter links para
 arquivos CSS e Javascript que não existem mais, a apresentação da página pode ficar prejudicada. A 
 figura \ref{fig:doc} mostra o conteúdo da primeira página retornada pela consulta "fibrose cística". 
@@ -251,7 +251,7 @@ Os experimentos mediram o desempenho de quatro modelos em 30 consultas. Os model
 modelo vetorial (VEC), modelo vetorial com \textit{anchor texts} (VEC+ANCHOR), 
 modelo vetorial com \textit{page rank} (VEC+PAGERANK) e o modelo vetorial com \textit{anchor texts} e \textit{page rank} (COMPLETE).
 Antes de analisar os resultados das consultas específicas, a tabela \ref{tab:general_results} descreve
-os resultados gerais dos quatro modelos. Cada estatística representa a média para
+os resultados gerais dos quatro modelos para os primeiros 1000 resultados retornados. Cada estatística representa a média para
 as 30 consultas naquele modelo. O modelo que alcançou a melhor \textit{Mean Average Precision} 
 foi o VEC+ANCHOR, no entanto, o modelo COMPLETE alcançou um NDCG maior. O NDCG é uma estatística mais completa, pois mede graus de relevância. 
 Além disso, em uma consulta na \textit{web} os usuários estão mais interessados nos primeiros resultados da busca, portanto,
@@ -270,26 +270,119 @@ para o \textit{page rank} em todas as consultas.
 A nossa máquina de busca não indexa termos com menos de 3 caracteres, números ou \textit{stop words}, portanto, consultas
 como "g1" não retornaram nenhum resultado. As consultas "o que é crush" e "por que o feijão está caro" não tiveram documentos
 relevantes classificados, portanto, sua análise fica prejudicada. E, a maior parte das consultas tiveram um número muito baixo
-de relevantes classificados.
+de documentos relevantes classificados.
 
-Ignorando as excessões descritas no parágrafo anterior, vamos analisar as duas consultas que tiveram o pior desempenho e as
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{query_como_fazer_crepioca.png}
+\caption{Como fazer crepioca} 
+\label{fig:crepioca}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{query_banco_brasil.png}
+\caption{Banco brasil} 
+\label{fig:banco_brasil}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{query_folha.png}
+\caption{Folha} 
+\label{fig:folha}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{query_sisu.png}
+\caption{Sisu} 
+\label{fig:sisu}
+\end{figure}
+
+Os gráficos de precisão e revocação construídos utilizam a precisão interpolada (iprec). Ou seja, a precisão no nível de
+revocação $ r_j $ se dá pela expressão:
+
+\[
+P(r_j) = max_{\forall r : r_j \leq r} P(r)
+\]
+
+Logo, a precisão dos níveis de revocação é sempre não crescente.
+
+Ignorando as excessões descritas anteriormente, vamos analisar as duas consultas que tiveram o pior desempenho e as
 duas consultas que tiveram o melhor desempenho no modelo COMPLETE com base no NDCG\_5. As piores consultas foram "banco brasil",
 com NDCG 0.22, e "como fazer crepioca" com NDCG 0.20 e, as melhores consultas foram "sisu", com NDCG 1.00, e "folha", com
-NDCG 0.85. Além dos motivos listados anteriormente, o NDCG é um índice interessante, pois ele mostra quão próxima do melhor resultado
-possível está nossa máquina de busca.
+NDCG 0.85. Além dos motivos listados anteriormente, o NDCG é um índice interessante, pois ele mostra quão próximo do melhor
+possível é o resultado da máquina de busca, dada a nossa classificação.
 
-Primeiramente, o desempenho da consulta "como fazer crepioca" provavelmente foi ruim porque esta consulta tem um grau de dificuldade
-maior do que as outras. O usuário não está interessado meramente em uma página sobre crepiocas, mas em uma página que contenha receitas
-de crepiocas. O modelo COMPLETE retornou 9 das 10 páginas relevantes, no entanto, ele não foi competente em classificá-las nas primeiras
-posições.
+A figura \ref{fig:crepioca} mostra o gráfico de precisão e revocação para a consulta "como fazer crepioca". No caso dessa consulta,
+podemos observar que o modelo vetorial alcança bons resultados, no entanto, a incorporação dos \textit{anchor texts} piora o 
+resultado geral. Isso ocorre porque as páginas com o melhor \textit{score} são apontadas por \textit{links} com
+a palavra "fazer" e não "crepioca", que é o termo mais relevante para expressar a intenção do usuário. No caso do \textit{anchor text},
+a forma como o algoritmo foi implementado não leva em consideração o TF-IDF dos termos, algo que agora se mostra um problema.
 
+A figura \ref{fig:banco_brasil} mostra o gráfico de precisão e revocação para a consulta "banco brasil". Observe que o NDCG\_5 é maior
+que zero apesar da precisão ser zero em todos os níveis de revocação. Isso ocorre porque documentos classificados com \textit{score} 
+menor que 3 são considerados irrelevantes, no entanto, eles entram no cálculo do NDCG\_5.
+Como no caso da consulta "como fazer crepioca", a incorporação dos \textit{anchor texts} piorou o resultado em comparação ao modelo vetorial. No entanto,
+nesse caso isso se dá provavelmente pelas páginas apontadas pelo termo "brasil" cujo conteúdo não é diretamente relacionado com
+o "banco do brasil". Dito isso, mesmo o modelo vetorial não alcança resultados muito bons. No caso dessa consulta, o \textit{overhead}
+de significados das palavras "banco" e "brasil" é muito grande, então, os resultados acabam retornando páginas de outros bancos ou páginas
+brasileiras que mencionam algum banco.
+
+As figuras \ref{fig:folha} e \ref{fig:sisu} mostram os gráficos de precisão e revocação para as melhores consultas. Nesse caso,
+a incorporação dos \textit{anchor texts} foi fundamental para garantir bons resultados. No caso da consulta "folha", a intenção
+do usuário é clara e, praticamente qualquer página no \textit{site} da Folha de São Paulo vai ter alguma relevância para a consulta.
+No caso da consulta "sisu", por ser um termo relativamente raro, a maior parte das páginas retornadas tende a ter conteúdo próximo
+da necessidade informacional do usuário. Além disso, ao utilizar a informação dos \textit{anchor texts} para classificar os resultados 
+acabamos colocando as páginas cujo conteúdo é exclusivamente sobre o "sisu" em posições mais altas do \textit{rank}.
+Cabe ressaltar que o bom desempenho
+da máquina de busca nessas consultas também deriva da forma como os documentos relevantes foram escolhidos. Como os próprios 
+documentos ranqueados pela máquina de busca que estamos estudando faziam parte dos documentos avaliados por humanos, é natural que a taxa de acerto 
+seja boa. Ou, ao menos bem melhor do que se a coleção inteira tivesse sido avaliada.
 
 \section{Conclusão}
 
 O objetivo do trabalho prático 3 era implementar um sistema de consultas e uma interface gráfica. O resultado
 está disponível em visconde.latin.dcc.ufmg.br:8080 (só funciona na porta 8080). Os sinais do
-\textit{anchor text} e do \textit{page rank} mostraram uma melhora considerável na efetividade
-das consultas, no entanto, o resultado final ainda mostrou um desempenho aquém do desejável em
-um cenário de busca realista.
+\textit{anchor text} foram muito valiosos para melhorar o resultados das buscas, no entanto,
+o \textit{page rank} mostrou um desempenho aquém do desejável. Dadas as limitações do método de avaliação humana 
+utilizado, os resultados gerais dos experimentos foram positivos.
+
+\section{Apêndice A}
+
+O apêndice contém os gráficos de precisão interpolada e revocação para todas as consultas, utilizando a mesma
+legenda dos gráficos apresentados no corpo do texto. Como o modelo COMPLETE dá um peso muito maior para o \textit{anchor text}
+do que para o \textit{page rank}, a curva do modelo VEC+ANCHOR acaba ficando escondida pelo modelo COMPLETE em parte dos gráficos.
+Os gráficos que são linhas horizontais normalmente contém muito poucos documentos relevantes, então a revocação 100\% é alcançada
+rapidamente e, devido ao critério da precisão interpolada, o maior nível de precisão é propagado para os níveis de revocação anteriores.
+
+Tome o caso da consulta "belo horizonte" que só contém 2 documentos relevantes. Nesse caso, o nível de revocação 100\% é alcançado antes
+do décimo documento para o modelo COMPLETE.
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{queries_01_to_06.png}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{queries_07_to_12.png}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{queries_13_to_18.png}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{queries_19_to_24.png}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{queries_25_to_30.png}
+\end{figure}
 
 \end{document}

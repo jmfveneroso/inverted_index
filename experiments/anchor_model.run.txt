@@ -13998,7 +13998,6 @@
 15 998 1996549 macblogger.com.br/tirar-boas-fotos-iphone 595.188
 15 999 5379692 cienciamoderna.com.br/pen-drive-para-iphone-e-ipad-16gb-sandisk-ixpand-sdix-016g-g57/p 595.081
 15 1000 4991300 buscape.com.br/oferta/celular-e-smartphone/211724196/79 595.042
-[402098] /mnt/hd0/joao_test/collection/html_1
 16 1 2210803 eotica.com.br/oculos-de-grau/ana-hickmann 182238
 16 2 2210957 eotica.com.br/oculos-de-grau/hickmann 90636.3
 16 3 2264228 epocacosmeticos.com.br/ana-hickmann 65159.3
@@ -25571,8 +25570,6 @@
 27 998 776398 naturaleponto.com.br/blog 74.833
 27 999 2217521 marianakalil.com.br/turma-da-mari/nutri-carina-borges-ensina-o-be-ba-para-gente-preparar-nossa-marmita 74.6961
 27 1000 9687 menosmassasmaismacas.blogspot.com.br/2014/07 74.6833
-[547933] /mnt/hd0/joao_test/collection/html_2
-[551169] /mnt/hd0/joao_test/collection/html_3
 28 1 2923982 blogdajo.com.br/tag/como-fazer 110573
 28 2 3306325 jogosdemeninas.uol.com.br/bolo 104902
 28 3 2234237 espaconutricional.com.br/receita-de-bolo-de-banana-de-micro-ondas 83080.2
