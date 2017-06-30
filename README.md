@@ -29,7 +29,7 @@ The executable will be written to "build/src/search".
 To create the inverted index, run:
 
 ```
-$ ./search inverted-index <path/to/collection> <output_filename>
+$ ./search_engine inverted-index <path/to/collection> <output_filename>
 ```
 
 The program will write the inverted index for the collection specfied in the first argument to the file specified in the second argument.
@@ -39,7 +39,7 @@ The program will write the inverted index for the collection specfied in the fir
 After creating the inverted index file you can load it and run queries by running the following command:
 
 ```
-$ ./search load <path/to/collection> <inverted_index>
+$ ./search_engine load <path/to/collection> <inverted_index>
 ```
 
 After that, the program may take a few seconds to load the dictionary and document map. And, after that the following prompt will appear:
@@ -66,6 +66,25 @@ The number in parenthesis is the document id. To read document 10687 for example
 ```
 $ Query >> read 10687
 ```
+
+**Evaluating queries**
+
+To run a set of queries separated by newlines in a file, execute:
+
+```
+$ ./search_engine run <collection_dir> <inverted_file> <queries_file>
+```
+
+Obs: the root directory contains an example queries file "queries.txt".
+
+After writing the results to a file, evaluate according to a set of relevant documents by executing:
+
+```
+$ ./search_engine eval <qrels_file> <results_file>
+```
+
+Obs: the root directory contains an example qrels file "qrels.txt".
+The output prints all relevant IR statistics for that output.
 
 **Running the server**
 
