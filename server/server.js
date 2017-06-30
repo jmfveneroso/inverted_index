@@ -30,6 +30,7 @@ binding.loadDocCollection(process.argv[2]);
 binding.loadInvertedIndex(process.argv[3]);
 
 var query;
+var weights = [1000, 100, 10];
 
 // At root we return a view with the query results.
 app.get('/', function (req, res) {
@@ -43,8 +44,16 @@ app.get('/', function (req, res) {
 
   var start = new Date();
 
+  if (vectorRank != weights[0] || anchorRank != weights[1] || pageRank != weights[2] ) {
+    query = "";
+  }
+  weights[0] = vectorRank;
+  weights[1] = anchorRank;
+  weights[2] = pageRank;
+
   if (query != req.query.q && req.query.q) {
     console.log("Query: " + req.query.q);
+    page = 1;
     binding.search(req.query.q, vectorRank, anchorRank, pageRank);
     query = req.query.q;
   } 
